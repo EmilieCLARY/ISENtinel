@@ -1,6 +1,9 @@
-import { Button } from '@mui/material'
-import { useContext, useEffect, useState  } from 'react';
+//import { Button } from '@mui/material'
+import { useContext, useState, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/user.context';
+
+
+import Button from 'react-bootstrap/Button';
 
 import io from 'socket.io-client';
 
@@ -9,6 +12,31 @@ const socket = io('http://localhost:5000');
 export default function Home() {
  const { logOutUser } = useContext(UserContext);
  const [response, setResponse] = useState('');
+
+ const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+ useEffect(() => {
+  const getWebcamVideo = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream; // Store stream reference for cleanup
+      }
+    } catch (error) {
+      console.error("Error accessing webcam:", error);
+    }
+  };
+
+  getWebcamVideo();
+
+  return () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+  };
+}, []);
  
  // This function is called when the user clicks the "Logout" button.
  const logOut = async () => {
@@ -40,11 +68,20 @@ export default function Home() {
       <h1>Welcome to ISENtinel</h1>
       <p>You are now logged in!</p>
 
-      <Button variant="contained" onClick={"oué"}>Add Items</Button>
-      <br></br>
-     <Button variant="contained" onClick={logOut}>Logout</Button>
-     <Button variant="contained" onClick={handleClick}>Send Message</Button>
+     <Button variant="primary" onClick={logOut}>Logout</Button>{' '}
+     <Button variant="primary" onClick={handleClick}>Send Message</Button>
      <p>Server Response: {response}</p>
+
+     {/* Video from aN URL 
+     <video className="w-100" autoPlay loop muted>
+      <source
+        src="https://mdbootstrap.com/img/video/animation-intro.mp4"
+        type="video/mp4"
+        allowFullScreen
+      />
+ </video>*/}
+
+    <video className="w-50" autoPlay muted ref={videoRef} />
    </>
  )
 }
