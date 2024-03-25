@@ -46,6 +46,17 @@ io.on('connection', (socket) => {
         mongodb.addEventToBDD(id, end_time, anomaly_type, camera_id, path);
     });
 
+    socket.on('deleteEventFromBDD', (id) => {
+        console.log('Event deleted :', id);
+        mongodb.deleteEventFromBDD(id);
+    });
+
+    socket.on('getAllEvents', async () => {
+        console.log('Get all events');
+        let table_event = await mongodb.getEventsFromBDD();
+        socket.emit('allEvents', table_event);
+    });
+
 });
 
 server.listen(PORT, () => {

@@ -2,7 +2,19 @@ import { Button, TextField } from "@mui/material";
 import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context";
- 
+import React from 'react';
+import {
+  MDBBtn,
+  MDBContainer,
+  MDBCard,
+  MDBCardBody,
+  MDBCardImage,
+  MDBRow,
+  MDBCol,
+  MDBInput,
+  MDBCheckbox,
+} from 'mdb-react-ui-kit'; 
+
 const Signup = () => {
  const navigate = useNavigate();
  const location = useLocation();
@@ -30,8 +42,8 @@ const Signup = () => {
  // As explained in the Login page.
  const onSubmit = async () => {
    try {
-     const user = await emailPasswordSignup(form.email, form.password);
-     if (user) {
+    const user = await emailPasswordSignup(document.getElementById('form1').value, document.getElementById('form2').value);
+    if (user) {
        redirectNow();
      }
    } catch (error) {
@@ -39,31 +51,38 @@ const Signup = () => {
    }
  };
  
- return <form style={{ display: "flex", flexDirection: "column", maxWidth: "300px", margin: "auto" }}>
-   <h1>Signup</h1>
-   <TextField
-     label="Email"
-     type="email"
-     variant="outlined"
-     name="email"
-     value={form.email}
-     onInput={onFormInputChange}
-     style={{ marginBottom: "1rem" }}
-   />
-   <TextField
-     label="Password"
-     type="password"
-     variant="outlined"
-     name="password"
-     value={form.password}
-     onInput={onFormInputChange}
-     style={{ marginBottom: "1rem" }}
-   />
-   <Button variant="contained" color="primary" onClick={onSubmit}>
-     Signup
-   </Button>
-   <p>Have an account already? <Link to="/login">Login</Link></p>
- </form>
+ return <>
+ <MDBContainer className='my-5'>
+   <MDBCard>
+
+     <MDBRow className='g-0 d-flex align-items-center'>
+
+       <MDBCol md='4'>
+         <MDBCardImage src='https://mdbootstrap.com/img/new/ecommerce/vertical/004.jpg' alt='phone' className='rounded-t-5 rounded-tr-lg-0' fluid />
+       </MDBCol>
+
+       <MDBCol md='8'>
+
+         <MDBCardBody>
+
+           <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
+           <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
+
+           <div className="d-flex justify-content-between mx-4 mb-4">
+              <Link to="/">Login</Link>
+            </div>
+
+           <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Sign up</MDBBtn>
+
+         </MDBCardBody>
+
+       </MDBCol>
+
+     </MDBRow>
+
+   </MDBCard>
+ </MDBContainer>
+</>
 }
  
 export default Signup;
