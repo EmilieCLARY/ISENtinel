@@ -62,12 +62,18 @@ export default function Home() {
   socket.on('message received', (msg) => {
     setResponse(msg);
   });
+
+  const addEventToBDD = (id, end_time, anomaly_type, camera_id, path) => {
+    // Emit an event to the server when the user clicks the button.
+    socket.emit('addEventToBDD', "oui", "string", "string", 9, "string");
+  }
  
  return (
    <>
       <h1>Welcome to ISENtinel</h1>
       <p>You are now logged in!</p>
 
+     <Button variant="primary" onClick={addEventToBDD}>Add Event to BDD</Button>{' '}
      <Button variant="primary" onClick={logOut}>Logout</Button>{' '}
      <Button variant="primary" onClick={handleClick}>Send Message</Button>
      <p>Server Response: {response}</p>
