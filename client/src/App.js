@@ -4,7 +4,7 @@ import Home from "./pages/Home.page";
 import Login from "./pages/Login.page";
 import PrivateRoute from "./pages/PrivateRoute.page";
 import Signup from "./pages/Signup.page";
-
+import Event from "./pages/Event.page";
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
  
@@ -21,6 +21,8 @@ function App() {
          {/* users by wrapping it with PrivateRoute here. */}
          <Route element={<PrivateRoute />}>
            <Route exact path="/" element={<Home />} />
+           <Route exact path="/event" element={<Event />} />
+
          </Route>
        </Routes>
      </UserProvider>
