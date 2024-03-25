@@ -22,7 +22,11 @@ export default function Home() {
  
  return (
    <>
-     <h1>Welcome to ISENtinel</h1>
+      <h1>Welcome to ISENtinel</h1>
+      <p>You are now logged in!</p>
+
+      <Button variant="contained" onClick={"oué"}>Add Items</Button>
+      <br></br>
      <Button variant="contained" onClick={logOut}>Logout</Button>
    </>
  )
