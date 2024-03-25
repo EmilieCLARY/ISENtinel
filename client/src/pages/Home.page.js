@@ -1,9 +1,14 @@
 import { Button } from '@mui/material'
-import { useContext } from 'react';
+import { useContext, useEffect, useState  } from 'react';
 import { UserContext } from '../contexts/user.context';
- 
+
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
 export default function Home() {
  const { logOutUser } = useContext(UserContext);
+ const [response, setResponse] = useState('');
  
  // This function is called when the user clicks the "Logout" button.
  const logOut = async () => {
@@ -19,6 +24,16 @@ export default function Home() {
      alert(error)
    }
  }
+
+ const handleClick = () => {
+    // Emit a message to the server when the user clicks the button.
+    socket.emit('message', 'Hello from the client!');
+  }
+
+  // Listen for the server's response
+  socket.on('message received', (msg) => {
+    setResponse(msg);
+  });
  
  return (
    <>
@@ -28,6 +43,8 @@ export default function Home() {
       <Button variant="contained" onClick={"oué"}>Add Items</Button>
       <br></br>
      <Button variant="contained" onClick={logOut}>Logout</Button>
+     <Button variant="contained" onClick={handleClick}>Send Message</Button>
+     <p>Server Response: {response}</p>
    </>
  )
 }
