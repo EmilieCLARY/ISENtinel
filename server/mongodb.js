@@ -1,21 +1,25 @@
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb+srv://admin:admin@isentinel.fw6fyxk.mongodb.net/";
-
-var dbo = db.db("ISENtinel");
-var EVENT = dbo.collection("EVENT");
-var PROFILE = dbo.collection("PROFILE");
-var ANOMALY_DEGREE = dbo.collection("ANOMALY_DEGREE");
+const { MongoClient } = require("mongodb");
+var uri = "mongodb+srv://admin:admin@isentinel.fw6fyxk.mongodb.net/";
+const client = new MongoClient(uri);
 
 function addEventToBDD(id, end_time, anomaly_type, camera_id, path) {
-    let myobj_checked = checkEventObject(id, end_time, anomaly_type, camera_id, path);    
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        EVENT.insertOne(myobj_checked, function(err, res) {
-            if (err) throw err;
-            console.log("1 event inserted");
-            db.close();
-        });
-    });
+
+    async function run() {
+      try {
+        const database = client.db('ISENtinel');
+        const collection = database.collection('EVENT');
+        // create a document to be inserted
+        const doc = checkEventObject(id, end_time, anomaly_type, camera_id, path);
+        const result = await collection.insertOne(doc);
+        console.log("Object have been inserted into the collection with the id ", result.insertedId);
+
+      } finally {
+        // Ensures that the client will close when you finish/error
+        await client.close();
+      }
+    }
+    run().catch(console.dir);
+
 }
 
 function checkEventObject(id, end_time, anomaly_type, camera_id, path){
@@ -54,8 +58,6 @@ function checkEventObject(id, end_time, anomaly_type, camera_id, path){
     return myobj;
 }
 
-
 module.exports = {
-    addItemsToCollection,
     addEventToBDD
 };
