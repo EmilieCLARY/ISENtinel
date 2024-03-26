@@ -2,6 +2,8 @@ import { Button, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context";
+import Image from 'react-bootstrap/Image';
+import logo from '../resources/images/logo.png'
 import React from 'react';
 import {
   MDBBtn,
@@ -86,36 +88,38 @@ const Login = () => {
   };
   
 return <>
-  <MDBContainer className='my-5'>
-    <MDBCard>
+  <div className="d-flex justify-content-center align-items-center vh-100">
+    <MDBContainer className='my-5 justify-content-center'>
+      <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>
 
-      <MDBRow className='g-0 d-flex align-items-center'>
+        <MDBRow className='g-0 d-flex align-items-center'>
 
-        <MDBCol md='4'>
-          <MDBCardImage src='https://mdbootstrap.com/img/new/ecommerce/vertical/004.jpg' alt='phone' className='rounded-t-5 rounded-tr-lg-0' fluid />
-        </MDBCol>
+          <MDBCol md='4'>
+            <Image src={logo} className='rounded-t-5 rounded-tr-lg-0' alt="ISENtinel logo" fluid/>
+          </MDBCol>
 
-        <MDBCol md='8'>
+          <MDBCol md='8'>
 
-          <MDBCardBody>
+            <MDBCardBody>
 
-            <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
-            <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
+              <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
+              <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
 
-            <div className="d-flex justify-content-between mx-4 mb-4">
-              <Link to="/signup">Sign up</Link>
-            </div>
+              <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Log in</MDBBtn>
 
-            <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Log in</MDBBtn>
+              <div className="text-end">
+                  <Link to="/signup">Sign up</Link>
+              </div>
 
-          </MDBCardBody>
+            </MDBCardBody>
 
-        </MDBCol>
+          </MDBCol>
 
-      </MDBRow>
+        </MDBRow>
 
-    </MDBCard>
-  </MDBContainer>
+      </MDBCard>
+    </MDBContainer>
+  </div>
 </>
 }
 
