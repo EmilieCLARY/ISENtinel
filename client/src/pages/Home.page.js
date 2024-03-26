@@ -35,7 +35,7 @@ export default function Home() {
     }
   };
 
-  getWebcamVideo();
+  //getWebcamVideo();
 
   return () => {
     if (streamRef.current) {
@@ -80,8 +80,8 @@ export default function Home() {
       <Container>
         <h1>Welcome to ISENtinel</h1>
         <Row style={{paddingBottom: '2vh'}}>
-          <Col style={{ height: '60vh' }}><video style={{ width: '100%',  height: '100%',  objectFit: 'cover' }} autoPlay muted ref={videoRef} /></Col>
-          <Col style={{ height: '60vh' }}><video style={{ width: '100%',  height: '100%',  objectFit: 'cover' }} autoPlay muted ref={videoRef2} /></Col>
+          <Col style={{ height: '60vh' }}><img  src="http://localhost:5000/video_feed" alt="Video Feed" /></Col>
+          <Col style={{ height: '60vh' }}><img  src="http://localhost:5000/video_feed" alt="Video Feed" /></Col>
         </Row>
         <Row>
           <Col>
@@ -116,6 +116,7 @@ export default function Home() {
         allowFullScreen
       />
  </video>*/}
+ 
 
     
    </>
