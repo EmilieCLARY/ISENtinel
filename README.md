@@ -5,7 +5,7 @@ Commands to install the project :
 - In client/api, create a virtual environment : python -m venv venv
 - Activate it :
    - On Linux : ./venv/bin/activate
-   - On Windows : ./venv/Scripts/activate
+   - On Windows : ./venv/Scripts/Activate
 - Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone
 
 Commands to launch the project :
