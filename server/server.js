@@ -20,6 +20,14 @@ const io = socketIo(server, {
 // Enable CORS for all routes
 app.use(cors());
 
+app.get('/', (req, res) => {
+    request('http://localhost:8000/video_feed', function (error, response, body) {
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        res.send(body);
+})
+});
+
 app.get('/api', (req, res) => {
     res.json({"users": ["user1", "user2", "user3"]})
 });

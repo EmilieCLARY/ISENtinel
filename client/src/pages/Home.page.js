@@ -81,7 +81,7 @@ export default function Home() {
         <h1>Welcome to ISENtinel</h1>
         <Row style={{paddingBottom: '2vh'}}>
           <Col style={{ height: '60vh' }}><img  src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
-          <Col style={{ height: '60vh' }}><video style={{ width: '100%',  height: '100%',  objectFit: 'cover', borderRadius: '8px'}} autoPlay muted ref={videoRef2} /></Col>
+          <Col style={{ height: '60vh' }}><img src='http://100.66.14..50:8080' alt='Video2' /></Col>
         </Row>
         <Row>
           <Col>
