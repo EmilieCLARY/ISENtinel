@@ -3,6 +3,8 @@ import { useContext, useState, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/user.context';
 import Button from 'react-bootstrap/Button';
 import io from 'socket.io-client';
+import NavbarComponent from '../components/Navbar';
+import { MDBBadge, MDBBtn, MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
 
 const socket = io('http://localhost:5000');
 
@@ -31,16 +33,15 @@ export default function Event(){
 
     socket.on('allEvents', (data) => {
         setTableEvent(data);
-        console.log(table_event);
     });
-
 
     return (
         <>
-        <div>
+        <div onLoad={getAllEvents}>
+            <NavbarComponent />
             <h1>Event</h1>
             <Button onClick={logOut}>Logout</Button>
-            <Button onClick={getAllEvents}>Get All Events</Button>
+            {/*<Button onClick={getAllEvents}>Get All Events</Button>*/}
             <table>
                 <thead>
                     <tr>

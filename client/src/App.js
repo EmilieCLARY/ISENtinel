@@ -22,7 +22,6 @@ function App() {
          <Route element={<PrivateRoute />}>
            <Route exact path="/" element={<Home />} />
            <Route exact path="/event" element={<Event />} />
-
          </Route>
        </Routes>
      </UserProvider>

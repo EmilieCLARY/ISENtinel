@@ -3,7 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context";
 import Image from 'react-bootstrap/Image';
-import logo from '../resources/images/logo.png'
+import logo from '../resources/images/logo.png';
+import background from '../resources/images/lilleB.png';
 import React from 'react';
 import {
   MDBBtn,
@@ -87,40 +88,31 @@ const Login = () => {
     }
   };
   
-return <>
-  <div className="d-flex justify-content-center align-items-center vh-100">
-    <MDBContainer className='my-5 justify-content-center'>
-      <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>
-
-        <MDBRow className='g-0 d-flex align-items-center'>
-
-          <MDBCol md='4'>
-            <Image src={logo} className='rounded-t-5 rounded-tr-lg-0' alt="ISENtinel logo" fluid/>
-          </MDBCol>
-
-          <MDBCol md='8'>
-
-            <MDBCardBody>
-
-              <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
-              <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
-
-              <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Log in</MDBBtn>
-
-              <div className="text-end">
+return (
+  <>
+    <div className="d-flex justify-content-center align-items-center vh-100" style={{backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
+      <MDBContainer className='my-5 justify-content-center'>
+        <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 0 50px rgba(0, 0, 0, 0.5)' }}>
+          <MDBRow className='g-0 d-flex align-items-center'>
+            <MDBCol md='4'>
+              <Image src={logo} className='rounded-t-5 rounded-tr-lg-0' alt="ISENtinel logo" fluid/>
+            </MDBCol>
+            <MDBCol md='8'>
+              <MDBCardBody>
+                <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
+                <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
+                <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Log in</MDBBtn>
+                <div className="text-end">
                   <Link to="/signup">Sign up</Link>
-              </div>
-
-            </MDBCardBody>
-
-          </MDBCol>
-
-        </MDBRow>
-
-      </MDBCard>
-    </MDBContainer>
-  </div>
-</>
+                </div>
+              </MDBCardBody>
+            </MDBCol>
+          </MDBRow>
+        </MDBCard>
+      </MDBContainer>
+    </div>
+  </>
+);
 }
 
 export default Login;
