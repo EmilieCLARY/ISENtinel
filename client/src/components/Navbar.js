@@ -8,6 +8,8 @@ import Image from 'react-bootstrap/Image';
 import { UserContext } from '../contexts/user.context';
 import logo from '../resources/images/logo.png';
 
+import { BsBoxArrowRight } from "react-icons/bs";
+
 /*import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');*/
@@ -40,7 +42,7 @@ export default function NavbarComponent() {
                     <Nav.Link href="/event">Events</Nav.Link>
                 </Nav>
                 <Nav className="justify-content-end">
-                    <Nav.Link onClick={logOut}>Logout</Nav.Link>
+                    <Nav.Link onClick={logOut}>Logout <BsBoxArrowRight /></Nav.Link>
                 </Nav>
             </Container>
         </Navbar>
