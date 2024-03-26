@@ -3,6 +3,8 @@
 # dependencies
 /client/node_modules
 /server/node_modules
+/client/api/venv
+/client/api/__pycache__
 /.pnp
 .pnp.js
 
