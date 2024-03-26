@@ -3,7 +3,9 @@
 Commands to install the project :
 
 - In client/api, create a virtual environment : python -m venv venv
-- Activate it : . venv/bin/activate
+- Activate it :
+   - On Linux : ./venv/bin/activate
+   - On Windows : .\venv\Scripts\Activate (you need to enable script first : Set-ExecutionPolicy RemoteSigned -Scope Process)
 - Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone
 
 Commands to launch the project :
