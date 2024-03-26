@@ -1,0 +1,45 @@
+.logMessage {
+    margin: 0;
+}
+
+.alert1{
+    color: red;
+}
+
+.alert2{
+    color: rgb(255, 68, 0);
+}
+
+.alert3{
+    color: rgb(255, 136, 0);
+}
+
+.alert4{
+    color: rgb(255, 247, 0);
+}
+
+.alert5{
+    color: rgb(208, 255, 0);
+}
+
+.logDiv {
+    background-color: black;
+    color: 'white';
+}
+
+#scrollbar::-webkit-scrollbar {
+    width: 16px;
+}
+
+#scrollbar::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #989898;
+    border: 1px solid #cacaca;
+}
+
+#scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    background-color: #ffffff;
+}

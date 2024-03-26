@@ -33,11 +33,11 @@ export default function NavbarComponent() {
     return (
         <Navbar bg="dark" data-bs-theme="dark">
             <Container>
-                <Image src={logo} width="40" height="40" className="d-inline-block align-top" alt="ISENtinel logo" />
+                <Image src={logo} width="40" height="40" className="d-inline-block align-top" alt="ISENtinel logo" style={{marginRight: '1vw'}}/>
                 <Navbar.Brand href="/">ISENtinel</Navbar.Brand>
                 <Nav className="me-auto">
                     <Nav.Link href="/">Home</Nav.Link>
-                    <Nav.Link href="/events">Events</Nav.Link>
+                    <Nav.Link href="/event">Events</Nav.Link>
                 </Nav>
                 <Nav className="justify-content-end">
                     <Nav.Link onClick={logOut}>Logout</Nav.Link>
