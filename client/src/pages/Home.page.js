@@ -8,6 +8,8 @@ import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import Form from 'react-bootstrap/Form';
+import Table from 'react-bootstrap/Table';
 
 import { BsChevronDoubleLeft } from "react-icons/bs";
 
@@ -25,6 +27,9 @@ export default function Home() {
 
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [events, setEvents] = useState([]);
+  const [classNames, setClassNames] = useState({});
+  const [selectedClasses, setSelectedClasses] = useState({});  
+  const [filterText, setFilterText] = useState('');
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
@@ -34,6 +39,13 @@ export default function Home() {
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/class_names')
+      .then(response => response.json())
+      .then(data => setClassNames(data))
+      .catch(error => console.error('Error fetching class names:', error));
   }, []);
 
   useEffect(() => {
@@ -73,15 +85,64 @@ export default function Home() {
   const handleTMP = () => {
     addEventToState({ message: "Event 11", type: "alert1" });
   }
+
+  const handleCheckboxChange = (event, key) => {
+    setSelectedClasses(prevState => {
+      const updatedState = { ...prevState };
+      updatedState[key] = !prevState[key]; // Toggle the state
+      return updatedState;
+    });
+  };
+
+  /*useEffect(() => {
+    console.log(selectedClasses);
+  }, [selectedClasses]);*/
+
+  const filteredClassNames = Object.entries(classNames).filter(([key, value]) =>
+    value.toLowerCase().includes(filterText.toLowerCase())
+  );
  
+  const handleSaveChanges = () => {
+    // Implement your logic to save changes here
+    console.log('Changes saved:', selectedClasses);
+    // Create a table with the selected classes (table of int)
+    let selectedClassesTable = [];
+    for (let key in selectedClasses) {
+      if (selectedClasses[key]) {
+        selectedClassesTable.push(parseInt(key));
+      }
+    }
+    console.log(selectedClassesTable);
+    // Send the updated data to Flask server
+    fetch('http://localhost:8000/update_table', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ selectedClassesTable }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Table updated successfully:', data);
+    })
+    .catch(error => {
+        console.error('Error updating table:', error);
+    });
+  };
+
   return (
     <>
       <NavbarComponent />
       <Container>
         <h1>Welcome to ISENtinel</h1>
         <Row style={{paddingBottom: '2vh'}}>
-          <Col style={{ height: '60vh' }}><img  src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
-          <Col style={{ height: '60vh' }}><img src='http://100.66.14..50:8080' alt='Video2' /></Col>
+          <Col style={{ height: '60vh' }}><img style={{ width: '100%',  height: '100%',  objectFit: 'cover' , borderRadius: '8px'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
+          <Col style={{ height: '60vh' }}><img style={{ width: '100%',  height: '100%',  objectFit: 'cover' , borderRadius: '8px'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
         </Row>
         <Row>
           <Col>
@@ -113,7 +174,38 @@ export default function Home() {
           <Offcanvas.Title>Modify your preferences</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <p>Offcanvas content</p>
+        <Form.Control
+          type="text"
+          placeholder="Filter by class name"
+          value={filterText}
+          onChange={(event) => setFilterText(event.target.value)}
+          style={{ marginBottom: '1vh' }}
+        />
+        <Button variant="primary" onClick={handleSaveChanges} style={{ marginBottom: '1vh' }}>Save Changes</Button>
+        <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Class Name</th>
+            <th>Select</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredClassNames.map(([key, value], index) => (
+            <tr key={key}>
+              <td>{index + 1}</td>
+              <td>{value}</td>
+              <td>
+                <Form.Check
+                  type="checkbox"
+                  checked={selectedClasses[key] || false}
+                  onChange={(event) => handleCheckboxChange(event, key)}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
         </Offcanvas.Body>
       </Offcanvas>
 

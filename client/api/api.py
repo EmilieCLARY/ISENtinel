@@ -1,4 +1,4 @@
-from flask import Flask, Response
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from ultralytics import YOLO
 import cv2
@@ -6,14 +6,9 @@ import cvzone #pour diplay les detections avec des couleurs
 import math
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}, r"/video_feed": {"origins": "*"}}) # "*" permet à toutes les origines, vous pourriez vouloir limiter à "http://localhost:3000"
+CORS(app)
 
-def generate_frames():
-    cap = cv2.VideoCapture(0)
-    
-    model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
-
-    classNames = {
+classNames = {
     4:"Alarm clock",
     6: "Ambulance",
     14: "Axe",
@@ -535,17 +530,63 @@ def generate_frames():
     599:" Zebra",
     600:" Zucchini"}
 
+selected_classes = [];
+
+@app.route('/class_names')
+def class_names():
+    return jsonify(classNames)
+
+@app.route('/update_table', methods=['POST'])
+def update_table():
+    selected_classes_table = request.json.get('selectedClassesTable')
+    
+    # Update the table based on the received data
+    # Example: Update the selected_classes list
+    global selected_classes
+    selected_classes = selected_classes_table
+
+    # Print the updated table
+    print(selected_classes)
+    return jsonify({'message': 'Table updated successfully'})
+
+
+def generate_frames():
+    cap = cv2.VideoCapture(0)
+    
+    model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
+
+    
+
     while True:
         success, frame = cap.read()
         if not success:
             break
         else:
-            # Votre traitement d'image ici
-            
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            results = model(frame, stream=True) #detection des objets dans la frame
+            for r in results : 
+                boxes = r.boxes
+                for box in boxes : # on va chercher le x et y de toutes les binding boxes
+                    #x1, y1, x2, y2 = box.xyxy[0]
+                    #x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # pour les convertir en int et faciliter leur manipulation
+                    #cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 3)
+                    
+                    x1, y1, x2, y2 = box.xyxy[0]
+                    x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
+                    bbox = [x1, y1,w,h] #pour convertir les valeurs en int
+                    print(x1, y1, w, h)
+                    cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
+
+                    conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
+                    print(conf)
+
+                    class_name = int(box.cls[0]) #pour afficher le nom de la classe
+                    cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
+
+                    
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video_feed')
 def video_feed():
