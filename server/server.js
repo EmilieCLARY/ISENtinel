@@ -65,6 +65,13 @@ io.on('connection', (socket) => {
         socket.emit('allEvents', table_event);
     });
 
+    socket.on('getTableOfAnomalyDegree', async () => {
+        console.log('Socket : Get table of anomaly degree');
+        let table_anomaly_degree = await mongodb.getAnomalyDegreeFromBDD();
+        //console.log("Socket : ", table_anomaly_degree);
+        socket.emit('allDegree', table_anomaly_degree);
+    });
+
 });
 
 server.listen(PORT, () => {

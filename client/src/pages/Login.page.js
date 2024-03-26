@@ -92,7 +92,7 @@ return (
   <>
     <div className="d-flex justify-content-center align-items-center vh-100" style={{backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
       <MDBContainer className='my-5 justify-content-center'>
-        <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 0 50px rgba(0, 0, 0, 0.5)' }}>
+        <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', boxShadow: '0 0 50px rgba(0, 0, 0, 0.5)', borderRadius: '10px' }}>
           <MDBRow className='g-0 d-flex align-items-center'>
             <MDBCol md='4'>
               <Image src={logo} className='rounded-t-5 rounded-tr-lg-0' alt="ISENtinel logo" fluid/>

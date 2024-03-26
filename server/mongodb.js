@@ -14,11 +14,9 @@ async function addEventToBDD(id, end_time, anomaly_type, camera_id, path) {
         console.log("Object have been inserted into the collection with the id ", result.insertedId);
       } catch (err) {
         console.error(err);
-      } finally {
-        // Ensures that the client will close when you finish/error
-        await client.close();
       }
     }
+    //await client.close();
     run().catch(console.dir);
 }
 
@@ -34,10 +32,9 @@ async function editEventFromBDD(event_id, new_end_time, new_anomaly_type, new_ca
         }
         catch (err) {
             console.error(err);
-        } finally {
-            await client.close();
         }
     }
+    //await client.close();
     run().catch(console.dir);
 }
 
@@ -52,10 +49,9 @@ async function deleteEventFromBDD(event_id) {
         }
         catch (err) {
             console.error(err);
-        } finally {
-            await client.close();
         }
     }
+    //await client.close();
     run().catch(console.dir);
 }
 
@@ -81,10 +77,39 @@ async function getEventsFromBDD(event_id) {
         }
         catch (err) {
             console.error(err);
-        } finally {
-            await client.close();
         }
     }
+    //await client.close();
+    return run().catch(console.dir);
+}
+
+async function getAnomalyDegreeFromBDD() {
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('ANOMALY_DEGREE');
+            let table_anomaly_degree = [];
+            //console.log("Collection", collection);
+            if (!client.topology.isConnected()) {
+                await client.connect();
+            }
+            const anomaly_degrees = await collection.find({}).toArray();            
+            for(const anomaly_degree of anomaly_degrees) {
+                const result = {
+                    name: anomaly_degree.name,
+                    degree: anomaly_degree.degree
+                };
+                table_anomaly_degree.push(result);
+            }
+            return table_anomaly_degree;
+        }
+        catch (err) {
+            console.error(err);
+        }
+        
+    }
+    //await client.close();
     return run().catch(console.dir);
 }
 
@@ -128,5 +153,6 @@ module.exports = {
     addEventToBDD,
     deleteEventFromBDD,
     editEventFromBDD,
-    getEventsFromBDD
+    getEventsFromBDD,
+    getAnomalyDegreeFromBDD
 };
