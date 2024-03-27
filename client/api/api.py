@@ -4,6 +4,8 @@ from ultralytics import YOLO
 import cv2
 import cvzone #pour diplay les detections avec des couleurs
 import math
+import datetime
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -550,12 +552,37 @@ def update_table():
     return jsonify({'message': 'Table updated successfully'})
 
 
+main_folder_path = "../src/resources/videos"
+
 def generate_frames():
+    
     cap = cv2.VideoCapture(0)
+    
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+
+    # Get the current date and time
+    now = datetime.datetime.now()
+    date_string = now.strftime("%Y%m%d")
+    time_string = now.strftime("%H%M%S")
+    
+    # Create the folder path with the current date
+    folder_path = os.path.join(main_folder_path, date_string)
+    
+    # Create the folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    # Create the file name with the current time
+    file_name = date_string + "_" + time_string + ".avi"
+
+    # Create the complete file path
+    file_path = os.path.join(folder_path, file_name)
+    out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
     
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
 
-    
+    recording = False
+    is_object_detected = False
 
     while True:
         success, frame = cap.read()
@@ -563,30 +590,44 @@ def generate_frames():
             break
         else:
             results = model(frame, stream=True) #detection des objets dans la frame
-            for r in results : 
-                boxes = r.boxes
-                for box in boxes : # on va chercher le x et y de toutes les binding boxes
-                    #x1, y1, x2, y2 = box.xyxy[0]
-                    #x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # pour les convertir en int et faciliter leur manipulation
-                    #cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 3)
-                    
-                    x1, y1, x2, y2 = box.xyxy[0]
-                    x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
-                    bbox = [x1, y1,w,h] #pour convertir les valeurs en int
-                    print(x1, y1, w, h)
-                    cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
+            if not results:
+                recording = False
+                print("No object detected")
+            else:
+                recording = True
+                for r in results : 
+                    boxes = r.boxes
+                    for box in boxes : # on va chercher le x et y de toutes les binding boxes
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
+                        bbox = [x1, y1,w,h] #pour convertir les valeurs en int
+                        #print(x1, y1, w, h)
+                        cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
 
-                    conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
-                    print(conf)
+                        conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
+                        print(conf)
 
-                    class_name = int(box.cls[0]) #pour afficher le nom de la classe
-                    cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
+                        class_name = int(box.cls[0]) #pour afficher le nom de la classe
+                        cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
 
-                    
+                        is_object_detected = True
+                        recording = True
+
+            if recording:
+                out.write(frame)
+            if is_object_detected:
+                cv2.putText(frame, "Recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            else:
+                cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                out.release()
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            is_object_detected = False
+
+    cap.release()
+
 
 @app.route('/video_feed')
 def video_feed():

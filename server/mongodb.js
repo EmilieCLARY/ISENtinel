@@ -2,6 +2,12 @@ const { MongoClient } = require("mongodb");
 var uri = "mongodb+srv://admin:admin@isentinel.fw6fyxk.mongodb.net/";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+function attemptingCloseConnection() {
+    if (client.topology.isConnected()) {
+        client.close().then(() => console.log("Connection closed"));
+    }
+}
+
 async function addEventToBDD(id, end_time, anomaly_type, camera_id, path) {
     async function run() {
       try {
@@ -150,6 +156,7 @@ function checkEventObject(id, end_time, anomaly_type, camera_id, path){
 }
 
 module.exports = {
+    attemptingCloseConnection,
     addEventToBDD,
     deleteEventFromBDD,
     editEventFromBDD,
