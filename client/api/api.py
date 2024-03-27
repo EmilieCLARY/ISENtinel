@@ -554,10 +554,9 @@ def update_table():
 
 main_folder_path = "../src/resources/videos"
 
-def generate_frames():
-    
+def video_builder():
     cap = cv2.VideoCapture(0)
-    
+
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
     # Get the current date and time
@@ -579,6 +578,12 @@ def generate_frames():
     file_path = os.path.join(folder_path, file_name)
     out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
     
+    return out, cap
+    
+
+def generate_frames():
+    
+    out, cap = video_builder()
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
 
     recording = False
