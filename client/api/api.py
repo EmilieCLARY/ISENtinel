@@ -581,7 +581,8 @@ def generate_frames():
     
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
 
-    
+    recording = False
+    is_object_detected = False
 
     while True:
         success, frame = cap.read()
@@ -589,34 +590,43 @@ def generate_frames():
             break
         else:
             results = model(frame, stream=True) #detection des objets dans la frame
-            for r in results : 
-                boxes = r.boxes
-                for box in boxes : # on va chercher le x et y de toutes les binding boxes
-                    #x1, y1, x2, y2 = box.xyxy[0]
-                    #x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # pour les convertir en int et faciliter leur manipulation
-                    #cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 3)
-                    
-                    x1, y1, x2, y2 = box.xyxy[0]
-                    x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
-                    bbox = [x1, y1,w,h] #pour convertir les valeurs en int
-                    print(x1, y1, w, h)
-                    cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
+            if not results:
+                recording = False
+                print("No object detected")
+            else:
+                recording = True
+                for r in results : 
+                    boxes = r.boxes
+                    for box in boxes : # on va chercher le x et y de toutes les binding boxes
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
+                        bbox = [x1, y1,w,h] #pour convertir les valeurs en int
+                        #print(x1, y1, w, h)
+                        cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
 
-                    conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
-                    print(conf)
+                        conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
+                        print(conf)
 
-                    class_name = int(box.cls[0]) #pour afficher le nom de la classe
-                    cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
+                        class_name = int(box.cls[0]) #pour afficher le nom de la classe
+                        cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
 
-                    
-            out.write(frame) # Enregistrement de la frame dans le fichier de sortie
+                        is_object_detected = True
+                        recording = True
+
+            if recording:
+                out.write(frame)
+            if is_object_detected:
+                cv2.putText(frame, "Recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            else:
+                cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                out.release()
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            is_object_detected = False
+
     cap.release()
-    out.release()
-    cv2.destroyAllWindows()
 
 
 @app.route('/video_feed')

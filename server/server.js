@@ -48,6 +48,11 @@ io.on('connection', (socket) => {
 
     /* SOCKET BDD */
 
+    socket.on('attemptingCloseConnection', () => {
+        console.log('Attempting to close connection');
+        mongodb.attemptingCloseConnection();
+    });
+
     socket.on('addEventToBDD', (id, end_time, anomaly_type, camera_id, path) => {
         console.log('Event received :', id, end_time, anomaly_type, camera_id, path);
         // How to execute a command export from the file mongodb.js?
