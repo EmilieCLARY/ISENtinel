@@ -1,9 +1,21 @@
 //import { Button } from '@mui/material'
 import { useContext, useState, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/user.context';
+
 import io from 'socket.io-client';
+
 import NavbarComponent from '../components/Navbar';
 import Table from 'react-bootstrap/Table';
+import Container from 'react-bootstrap/Container';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
+import Image from 'react-bootstrap/Image';
+
+import { BsCameraVideoFill, BsEyeFill, BsArrowRight} from "react-icons/bs";
+
+import gabinKidnapping from '../resources/images/GabinKidnapping.png';
 
 const socket = io('http://localhost:5000');
 
@@ -90,7 +102,7 @@ export default function Event(){
             case 5:
                 return "rgb(208, 255, 0)";
             default:
-                return "white";
+                return "rgb(0, 123, 255)";
         }
     }
 
@@ -100,33 +112,60 @@ export default function Event(){
         <div onLoad={getAllDegree}>
         <div onLoad={getAllEvents}>
             <NavbarComponent />
-            <h1 style={{ marginLeft: '3%', marginTop: '2%' }}>Events</h1>
-            <Table striped bordered hover style={{ width: '90%', margin: '0 auto' }} className='mt-5'>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Camera Number</th>
-                        <th>Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Anomaly Type</th>
-                        <th>Anomaly Level</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <Container >
+                <h1>Events</h1>
+                <Row xs={1} md={2} lg={3} className="g-5">
                     {table_event.map((event, index) => (
-                        <tr key={index}>
-                            <td>{event.id}</td>
-                            <td>{event.camera_id}</td>
-                            <td>{getDateFromId(event.id)}</td>
-                            <td>{getTimeFromId(event.id)}</td>
-                            <td>{event.end_time}</td>
-                            <td>{event.anomaly_type}</td>
-                            <td style={{ backgroundColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type)) }}> {getAnomalyLevelFromAnomalyType(event.anomaly_type)}</td>
-                        </tr>
+                        <Col key={index}>
+                            <Card style={{borderWidth: '3px' ,borderColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type))}}>
+                                <Card.Header style={{fontWeight: 'bold'}}>Event {event.id}</Card.Header>
+                                <Card.Body>
+                                    <div>
+                                        <Row style={{marginInline: '0.2vw'}}>
+                                            <Col>
+                                                Date: {getDateFromId(event.id)}
+                                            </Col>
+                                            <Col xs lg='2'>
+                                                <BsCameraVideoFill /> {event.camera_id}
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                    <div>
+                                        <Row style={{marginInline: '0.2vw'}}>
+                                            <Col>
+                                                From {getTimeFromId(event.id)} <BsArrowRight /> {event.end_time}
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                    <div className="d-flex flex-column justify-content-center"> {/* Center align the anomaly information, image, and button */}
+                                        <Row style={{ marginInline: '0.2vw' }}>
+                                            <Col>
+                                                <div className="d-flex justify-content-center"> {/* Center align the anomaly information */}
+                                                    Anomaly Detected: {event.anomaly_type}
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                        <Row style={{ marginInline: '0.2vw' }}>
+                                            <Col>
+                                                <div className="d-flex justify-content-center"> {/* Center align the image */}
+                                                    <Image src={gabinKidnapping} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                        <Row style={{ marginInline: '0.2vw' }}>
+                                            <Col>
+                                            <div className="d-flex justify-content-center" style={{marginTop: '1vh'}}>
+                                                <Button variant="primary">Clip <BsEyeFill style={{ fontSize: '20px' }} /></Button>
+                                            </div>
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
                     ))}
-                </tbody>
-            </Table>
+                </Row>
+            </Container>
         </div></div>
         </>
     )

@@ -10,6 +10,8 @@ import Col from 'react-bootstrap/Col';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
 import Table from 'react-bootstrap/Table';
+import Spinner from 'react-bootstrap/Spinner';
+import Alert from 'react-bootstrap/Alert';
 
 import { BsChevronDoubleLeft } from "react-icons/bs";
 
@@ -30,6 +32,9 @@ export default function Home() {
   const [classNames, setClassNames] = useState({});
   const [selectedClasses, setSelectedClasses] = useState({});  
   const [filterText, setFilterText] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState('success'); // State for alert variant
+  const [alertMessage, setAlertMessage] = useState(''); // State for alert message
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
@@ -74,16 +79,23 @@ export default function Home() {
   const addEventToState = (event) => {
     setEvents(prevEvents => [...prevEvents, event]);
     // Scroll to the bottom of the container when a new event is added.
+    setShowAlert(true); // Show alert when a new event is added
+    setAlertMessage("The event " + event.message + " has been detected"); // Set alert message
+    setAlertVariant('danger');
+    
     setTimeout(() => {
       const container = containerRef.current;
       if (container) {
         container.scrollTop = container.scrollHeight;
       }
-  }, 20);
+    }, 20);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 5000);
   }
 
   const handleTMP = () => {
-    addEventToState({ message: "Event 11", type: "alert1" });
+    addEventToState({ message: "Event 11", type: "alert3" });
   }
 
   const handleCheckboxChange = (event, key) => {
@@ -139,10 +151,22 @@ export default function Home() {
     <>
       <NavbarComponent />
       <Container>
-        <h1>Welcome to ISENtinel</h1>
+      {showAlert && (
+        <div  style={{position: 'absolute', width: '30vw', zIndex: '999', left: '35vw'}}>
+          <Alert
+            variant={alertVariant}
+            onClose={() => setShowAlert(false)}
+            dismissible
+            className="alert-slide"
+          >
+            {alertMessage}
+          </Alert>
+        </div>
+      )}
+        <h1 style={{paddingBottom: '1vh'}}>Welcome to ISENtinel</h1>
         <Row style={{paddingBottom: '2vh'}}>
-          <Col style={{ height: '60vh' }}><img style={{ width: '100%',  height: '100%',  objectFit: 'cover' , borderRadius: '8px'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
-          <Col style={{ height: '60vh' }}><img style={{ width: '100%',  height: '100%',  objectFit: 'cover' , borderRadius: '8px'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
+          <Col style={{ position: 'relative', height: '60vh'}}><Spinner animation="border" role="status" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: '1' }} /><img style={{ position: 'relative', width: '100%',  height: '100%',  objectFit: 'cover', border: '2px solid #ccc', borderRadius: '8px', zIndex: '2'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
+          <Col style={{ position: 'relative', height: '60vh'}}><Spinner animation="border" role="status" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: '1' }} /><img style={{ position: 'relative', width: '100%',  height: '100%',  objectFit: 'cover', border: '2px solid #ccc', borderRadius: '8px', zIndex: '2'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
         </Row>
         <Row>
           <Col>
@@ -173,7 +197,7 @@ export default function Home() {
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Modify your preferences</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body>
+        <Offcanvas.Body id='scrollbar'>
         <Form.Control
           type="text"
           placeholder="Filter by class name"
@@ -208,15 +232,6 @@ export default function Home() {
       </Table>
         </Offcanvas.Body>
       </Offcanvas>
-
-     {/* Video from aN URL 
-      <video className="w-100" autoPlay loop muted>
-        <source
-          src="https://mdbootstrap.com/img/video/animation-intro.mp4"
-          type="video/mp4"
-          allowFullScreen
-        />
-      </video>*/}
    </>
  )
 }

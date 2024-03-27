@@ -43,3 +43,19 @@
     background-clip: content-box;
     background-color: #ffffff;
 }
+
+/* CSS */
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+  
+.alert-slide {
+    animation: slideIn 0.5s ease-out;
+}
+
+  
