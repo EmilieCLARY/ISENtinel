@@ -8,6 +8,9 @@
 /.pnp
 .pnp.js
 
+# Video footages
+/client/src/resources/videos/*
+
 # testing
 /coverage
 

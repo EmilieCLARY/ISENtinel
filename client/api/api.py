@@ -4,6 +4,8 @@ from ultralytics import YOLO
 import cv2
 import cvzone #pour diplay les detections avec des couleurs
 import math
+import datetime
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -550,8 +552,32 @@ def update_table():
     return jsonify({'message': 'Table updated successfully'})
 
 
+main_folder_path = "../src/resources/videos"
+
 def generate_frames():
+    
     cap = cv2.VideoCapture(0)
+    
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+
+    # Get the current date and time
+    now = datetime.datetime.now()
+    date_string = now.strftime("%Y%m%d")
+    time_string = now.strftime("%H%M%S")
+    
+    # Create the folder path with the current date
+    folder_path = os.path.join(main_folder_path, date_string)
+    
+    # Create the folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    # Create the file name with the current time
+    file_name = date_string + "_" + time_string + ".avi"
+
+    # Create the complete file path
+    file_path = os.path.join(folder_path, file_name)
+    out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
     
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
 
@@ -583,10 +609,15 @@ def generate_frames():
                     cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
 
                     
+            out.write(frame) # Enregistrement de la frame dans le fichier de sortie
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+
 
 @app.route('/video_feed')
 def video_feed():
