@@ -6,6 +6,7 @@ import cvzone #pour diplay les detections avec des couleurs
 import math
 import datetime
 import os
+import sys
 
 app = Flask(__name__)
 CORS(app)
@@ -577,14 +578,19 @@ def video_builder():
     file_path = os.path.join(folder_path, file_name)
     out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
 
-    return out
-    
+    return out, file_path
+
+def check_video_frame_count(video_path):
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    cap.release()
+    return total_frames
 
 def generate_frames():
     
     cap = cv2.VideoCapture(0)
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
-    out = video_builder()
+    out, file_path = video_builder()
 
     recording = False
     is_object_detected = False
@@ -628,7 +634,11 @@ def generate_frames():
             else:
                 cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 out.release()
-                out = video_builder()
+                total_frames = check_video_frame_count(file_path)
+                if(total_frames < 10):
+                    os.remove(file_path)
+                out, file_path = video_builder()
+            
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
