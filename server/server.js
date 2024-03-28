@@ -28,6 +28,8 @@ app.get('/', (req, res) => {
 })
 });
 
+app.use('/resources', express.static('resources'))
+
 app.get('/api', (req, res) => {
     res.json({"users": ["user1", "user2", "user3"]})
 });
@@ -62,6 +64,11 @@ io.on('connection', (socket) => {
     socket.on('deleteEventFromBDD', (id) => {
         console.log('Event deleted :', id);
         mongodb.deleteEventFromBDD(id);
+    });
+
+    socket.on('getVideoFromFilepath', (path) => {
+        console.log('Get video from filepath :', path);
+        socket.emit('videoFromPath', path);
     });
 
     socket.on('getAllEvents', async () => {

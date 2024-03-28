@@ -572,7 +572,7 @@ def video_builder():
         os.makedirs(folder_path)
     
     # Create the file name with the current time
-    file_name = date_string + "_" + time_string + ".avi"
+    file_name = date_string + "_" + time_string + ".mp4"
 
     # Create the complete file path
     file_path = os.path.join(folder_path, file_name)

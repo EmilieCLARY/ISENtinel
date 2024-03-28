@@ -2,11 +2,11 @@
     margin: 0;
 }
 
-.alert1{
+.alert5{
     color: red;
 }
 
-.alert2{
+.alert4{
     color: rgb(255, 68, 0);
 }
 
@@ -14,11 +14,11 @@
     color: rgb(255, 136, 0);
 }
 
-.alert4{
+.alert2{
     color: rgb(255, 247, 0);
 }
 
-.alert5{
+.alert1{
     color: rgb(208, 255, 0);
 }
 
