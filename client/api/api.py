@@ -555,7 +555,6 @@ def update_table():
 main_folder_path = "../src/resources/videos"
 
 def video_builder():
-    cap = cv2.VideoCapture(0)
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
@@ -577,20 +576,23 @@ def video_builder():
     # Create the complete file path
     file_path = os.path.join(folder_path, file_name)
     out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
-    
-    return out, cap
+
+    return out
     
 
 def generate_frames():
     
-    out, cap = video_builder()
+    cap = cv2.VideoCapture(0)
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
+    out = video_builder()
 
     recording = False
     is_object_detected = False
 
     while True:
+        #out = video_builder()
         success, frame = cap.read()
+
         if not success:
             break
         else:
@@ -622,9 +624,11 @@ def generate_frames():
                 out.write(frame)
             if is_object_detected:
                 cv2.putText(frame, "Recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                #out.write(frame)
             else:
                 cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 out.release()
+                out = video_builder()
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
