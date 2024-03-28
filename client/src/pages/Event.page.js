@@ -5,15 +5,18 @@ import { UserContext } from '../contexts/user.context';
 import io from 'socket.io-client';
 
 import NavbarComponent from '../components/Navbar';
-import Table from 'react-bootstrap/Table';
+import ClipModal from '../components/ClipModal';
+
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Image from 'react-bootstrap/Image';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 
-import { BsCameraVideoFill, BsEyeFill, BsArrowRight} from "react-icons/bs";
+import { BsCameraVideoFill, BsEyeFill, BsArrowRight, BsChevronDoubleDown , BsChevronDoubleUp } from "react-icons/bs";
 
 import gabinKidnapping from '../resources/images/GabinKidnapping.png';
 
@@ -23,29 +26,31 @@ export default function Event(){
     const { logOutUser } = useContext(UserContext);
     const [table_event, setTableEvent] = useState([]);
     const [table_degree, setTableDegree] = useState([]);
+    const [tableFilteredAndSorted, setTableFilteredAndSorted] = useState([]);
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState("date");
+    const [sortOrderAsc, setSortOrderAsc] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
-    const logOut = async () => {
-        try {
-          // Calling the logOutUser function from the user context.
-          const loggedOut = await logOutUser();
-          // Now we will refresh the page, and the user will be logged out and
-          // redirected to the login page because of the <PrivateRoute /> component.
-          if (loggedOut) {
-            window.location.reload(true);
-          }
-        } catch (error) {
-          alert(error)
-        }
-    }
 
+    useEffect(() => {
+        getAllEvents();
+        getAllDegree();
+    }, []);
+
+    useEffect(() => {
+        // Update tableFilteredAndSorted whenever table_event, search, sortBy, or sortOrder changes
+        filterAndSortTable();
+    }, [table_event, search, sortBy, sortOrderAsc]);
 
     const getAllEvents = () => {
-        console.log("Get all events");
+        //console.log("Get all events");
         socket.emit('getAllEvents');
     }
 
     const getAllDegree = () => {
-        console.log("Get all degree");
+        //console.log("Get all degree");
         socket.emit('getTableOfAnomalyDegree');
     }
 
@@ -73,7 +78,7 @@ export default function Event(){
         for (let i=0; i<table_degree.length; i+=1){
 
             if (table_degree[i].name === anomaly_type) {
-                console.log("Trouvé :", anomaly_type, "est niveau", table_degree[i].degree);
+                //console.log("Trouvé :", anomaly_type, "est niveau", table_degree[i].degree);
                 return table_degree[i].degree;
             }
         }
@@ -106,16 +111,104 @@ export default function Event(){
         }
     }
 
+    function filterAndSortTable() {
+        console.log("Filter and sort table");
+        // Filter based on search query
+        let filteredTable = table_event.filter(event =>
+            event.anomaly_type.toLowerCase().includes(search.toLowerCase())
+        );
 
+         // Sort filteredTable based on sortBy and sortOrder
+         filteredTable.sort((a, b) => {
+            let aValue, bValue;
+
+            if (sortBy === "camera") {
+                aValue = a.camera_id;
+                bValue = b.camera_id;
+            } else if (sortBy === "date") {
+                aValue = a.id;
+                bValue = b.id;
+            } else if (sortBy === "anomaly") {
+                aValue = a.anomaly_type;
+                bValue = b.anomaly_type;
+            } else if (sortBy === "anomalyLevel") {
+                aValue = getAnomalyLevelFromAnomalyType(a.anomaly_type);
+                bValue = getAnomalyLevelFromAnomalyType(b.anomaly_type);
+            }
+            else {
+                return 0;
+            }
+
+            // For anomaly level, you may want to adjust the comparison logic based on your requirement
+            if (sortBy === "anomalyLevel") {
+                return sortOrderAsc ? aValue - bValue : bValue - aValue;
+            } else if (sortBy === "camera"){
+                return sortOrderAsc ? aValue - bValue : bValue - aValue;
+            } 
+            else {
+                return sortOrderAsc ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            }
+        });
+
+        setTableFilteredAndSorted(filteredTable);
+    }
+
+    function handleChangeSearch(event) {
+        setSearch(event.target.value);
+    }
+
+    function handleChangeSortBy(event) {
+        setSortBy(event.target.value);
+    }
+
+    function toggleSortOrder() {
+        setSortOrderAsc(!sortOrderAsc);
+    }
+
+    // Function to handle opening the modal and set the selected event
+    const handleOpenModal = (event) => {
+        setSelectedEvent(event);
+        setShowModal(true);
+    };
+
+    // Function to handle closing the modal
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedEvent(null);
+    };
+
+
+    
     return (
         <>
-        <div onLoad={getAllDegree}>
-        <div onLoad={getAllEvents}>
             <NavbarComponent />
-            <Container >
+            <Container style={{marginBottom: '10vh'}}>
+                <video controls style={{ width: '100%' }}>
+                <source src={'../resources/videos/20240328/20240328_103653.avi'} type="video/avi" />
+                Your browser does not support the video tag.
+                </video>
                 <h1>Events</h1>
+                <Form style={{marginInline: '20vw'}}>
+                    <InputGroup className="mb-1" controlid="formSearch">
+                        <InputGroup.Text id="basic-addon1">Search detected object</InputGroup.Text>
+                        <Form.Label></Form.Label>
+                        <Form.Control type="text" placeholder="Enter event name" value={search} onChange={handleChangeSearch} />
+                    </InputGroup>
+                    <InputGroup className="mb-2" controlid="formSortBy">
+                        <InputGroup.Text id="basic-addon1">Sort by</InputGroup.Text>
+                        <Form.Select onChange={handleChangeSortBy}>                            
+                            <option value="date">Date</option>
+                            <option value="camera">Camera</option>
+                            <option value="anomaly">Anomaly Type</option>
+                            <option value="anomalyLevel">Anomaly Level</option>
+                        </Form.Select>
+                        <Button variant="primary" onClick={toggleSortOrder}>
+                            {sortOrderAsc ? ("Desc " &&  <BsChevronDoubleDown /> ): "Asc " && <BsChevronDoubleUp />}
+                        </Button>
+                    </InputGroup>                    
+                </Form>
                 <Row xs={1} md={2} lg={3} className="g-5">
-                    {table_event.map((event, index) => (
+                    {tableFilteredAndSorted.map((event, index) => (
                         <Col key={index}>
                             <Card style={{borderWidth: '3px' ,borderColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type))}}>
                                 <Card.Header style={{fontWeight: 'bold'}}>Event {event.id}</Card.Header>
@@ -155,7 +248,7 @@ export default function Event(){
                                         <Row style={{ marginInline: '0.2vw' }}>
                                             <Col>
                                             <div className="d-flex justify-content-center" style={{marginTop: '1vh'}}>
-                                                <Button variant="primary">Clip <BsEyeFill style={{ fontSize: '20px' }} /></Button>
+                                                <Button variant="primary" onClick={() => handleOpenModal(event)}>Clip <BsEyeFill style={{ fontSize: '20px' }} /></Button>
                                             </div>
                                             </Col>
                                         </Row>
@@ -166,7 +259,12 @@ export default function Event(){
                     ))}
                 </Row>
             </Container>
-        </div></div>
+            <ClipModal 
+                show={showModal} 
+                onHide={handleCloseModal} 
+                date={selectedEvent ? getDateFromId(selectedEvent.id) : ''} 
+                time={selectedEvent ? getTimeFromId(selectedEvent.id) : ''} 
+            />
         </>
     )
 }
