@@ -54,6 +54,11 @@ export default function Event(){
         socket.emit('getTableOfAnomalyDegree');
     }
 
+    const getVideoFromFilepath = (filepath) => {
+        console.log("Get video from filepath");
+        socket.emit('getVideoFromFilePath', filepath);
+    }
+    
     socket.on('allEvents', (data) => {
         setTableEvent(data);
     });
@@ -61,6 +66,10 @@ export default function Event(){
     socket.on('allDegree', (data) => {
         setTableDegree(data);
         //console.log("Table degré socket", data);
+    });
+
+    socket.on('videoFromPath', (data) => {
+        console.log("Video from path");
     });
 
     function getDateFromId(id) {
@@ -96,19 +105,26 @@ export default function Event(){
         // 5: critical anomaly
 
         switch(anomaly_level){
-            case 1:
+            case 5:
                 return "red";
-            case 2:
+            case 4:
                 return "rgb(255, 68, 0)";
             case 3:
                 return "rgb(255, 136, 0)";
-            case 4:
+            case 2:
                 return "rgb(255, 247, 0)";
-            case 5:
+            case 1:
                 return "rgb(208, 255, 0)";
             default:
                 return "rgb(0, 123, 255)";
         }
+    }
+
+    function getPathFromId(id) { // id is a string of the form 'YYYYMMDD_HHMMSS', file path is a string of the form '../resources/videos/YYYYMMDD/YYYYYMMDD_HHMMSS.mp4'
+        let standard_path = "client/src/resources/videos/";
+        let date = id.substring(0, 8);
+        let file_path = standard_path + date + '/' + id + '.avi';
+        return file_path;
     }
 
     function filterAndSortTable() {
@@ -240,8 +256,11 @@ export default function Event(){
                                         </Row>
                                         <Row style={{ marginInline: '0.2vw' }}>
                                             <Col>
-                                                <div className="d-flex justify-content-center"> {/* Center align the image */}
-                                                    <Image src={gabinKidnapping} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
+                                                <div className="d-flex justify-content-center"> {/* Center align the video preview */}
+                                                    <video controls width="320" height="180" poster={gabinKidnapping}>
+                                                        <source src={`${getPathFromId(event.id)}`} type="video/mp4" />
+                                                            Your browser does not support the video tag.
+                                                    </video>
                                                 </div>
                                             </Col>
                                         </Row>
