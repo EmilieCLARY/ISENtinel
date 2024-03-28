@@ -624,7 +624,7 @@ def generate_frames():
                 out.write(frame)
             if is_object_detected:
                 cv2.putText(frame, "Recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                #out.write(frame)
+                out.write(frame)
             else:
                 cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 out.release()
