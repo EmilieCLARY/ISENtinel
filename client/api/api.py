@@ -581,8 +581,10 @@ def video_builder():
     return out, file_path
 
 def check_video_frame_count(video_path):
+    # Check the total number of frames in the video
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # Release the video capture object
     cap.release()
     return total_frames
 
@@ -634,7 +636,9 @@ def generate_frames():
             else:
                 cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 out.release()
+                # Check the total number of frames in the video
                 total_frames = check_video_frame_count(file_path)
+                # If the total number of frames is less than 10, delete the video
                 if(total_frames < 10):
                     os.remove(file_path)
                 out, file_path = video_builder()
