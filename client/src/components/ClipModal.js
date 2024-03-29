@@ -3,9 +3,8 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 const ClipModal = ({ show, onHide, date, time }) => {
-    // Generate the path of the video based on date and time
-    //const videoPath = `client/src/resources/videos/${date.replace(/-/g, '')}/${date.replace(/-/g, '_')}_${time.replace(/:/g, '')}.avi`;
-    const videoPath = `../resources/videos/20240328/20240328_103653.avi`;
+    //const videoPath = "/videos/20240328_151244.mp4";
+    const videoPath = "";
   
     return (
         <Modal show={show} onHide={onHide} centered >
@@ -14,7 +13,7 @@ const ClipModal = ({ show, onHide, date, time }) => {
         </Modal.Header>
         <Modal.Body>
             <video controls style={{ width: '100%' }}>
-            <source src={videoPath} type="video/x-msvideo" />
+            <source src={videoPath} type="video/mp4" />
             Your browser does not support the video tag.
             </video>
         </Modal.Body>

@@ -1,0 +1,26 @@
+.custom-list {
+    width: 30vw;
+    margin-left: 5vw; 
+}
+
+.custom-list .list-group-item {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.custom-list .list-group-item:hover {
+    background-color: lightgray; /* Change color on hover */
+    transform: scale(1.05); /* Zoom effect */
+}
+
+.custom-list .list-group-item .info {
+    display: none; /* Initially hide additional text */
+}
+
+.custom-list .list-group-item:hover .info {
+    display: inline; /* Show additional text on hover */
+}
+
+.custom-list .list-group-item:hover .name {
+    font-weight: bold; /* Make the name bold on hover */
+}

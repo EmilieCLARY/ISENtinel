@@ -557,7 +557,7 @@ main_folder_path = "../src/resources/videos"
 
 def video_builder():
 
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     # Get the current date and time
     now = datetime.datetime.now()

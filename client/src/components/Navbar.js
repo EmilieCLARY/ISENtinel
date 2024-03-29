@@ -41,6 +41,7 @@ export default function NavbarComponent() {
                 <Nav className="me-auto">
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/">Home</Nav.Link>
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/event">Events</Nav.Link>
+                    <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/info">Infos</Nav.Link>
                 </Nav>
                 <Nav className="justify-content-end">
                     <Button variant="info" onClick={logOut}>Logout <BsBoxArrowRight style={{fontSize: '23px'}} /></Button>

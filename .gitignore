@@ -10,6 +10,7 @@
 
 # Video footages
 /client/src/resources/videos/*
+/client/public/videos/*
 
 # testing
 /coverage

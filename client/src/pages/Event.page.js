@@ -199,10 +199,10 @@ export default function Event(){
         <>
             <NavbarComponent />
             <Container style={{marginBottom: '10vh'}}>
-                <video controls style={{ width: '100%' }}>
-                <source src={'../resources/videos/20240328/20240328_103653.avi'} type="video/avi" />
+                {/*<video controls style={{ width: '100%' }}>
+                <source src='client/src/resources/videos/20240328/20240328_110653.mp4' type="video/mp4" />
                 Your browser does not support the video tag.
-                </video>
+                </video>*/}
                 <h1>Events</h1>
                 <Form style={{marginInline: '20vw'}}>
                     <InputGroup className="mb-1" controlid="formSearch">
@@ -257,10 +257,11 @@ export default function Event(){
                                         <Row style={{ marginInline: '0.2vw' }}>
                                             <Col>
                                                 <div className="d-flex justify-content-center"> {/* Center align the video preview */}
-                                                    <video controls width="320" height="180" poster={gabinKidnapping}>
+                                                    {/*<video controls width="320" height="180" poster={gabinKidnapping}>
                                                         <source src={`${getPathFromId(event.id)}`} type="video/mp4" />
                                                             Your browser does not support the video tag.
-                                                    </video>
+                                                    </video>*/}
+                                                    <Image src={gabinKidnapping} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
                                                 </div>
                                             </Col>
                                         </Row>
