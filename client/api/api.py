@@ -556,7 +556,7 @@ def update_table():
     return jsonify({'message': 'Table updated successfully'})
 
 def defineFilePath(): 
-    main_folder_path = "../src/resources/videos"
+    main_folder_path = "../src/public/videos"
     now = datetime.datetime.now()
     folder_name = now.strftime("%Y%m%d")
     file_name = now.strftime("%Y%m%d_%H%M%S")
