@@ -7,6 +7,7 @@
 /client/api/__pycache__
 /.pnp
 .pnp.js
+/client/api/api.py.txt
 
 # Video footages
 /client/src/resources/videos/*
