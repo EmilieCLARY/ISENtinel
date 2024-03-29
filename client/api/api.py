@@ -561,7 +561,7 @@ def defineFilePath():
     folder_name = now.strftime("%Y%m%d")
     file_name = now.strftime("%Y%m%d_%H%M%S")
     folder_path = os.path.join(main_folder_path, folder_name)
-    complete_file_path = os.path.join(folder_path, file_name + ".mp4")
+    complete_file_path = os.path.join(folder_path, file_name + ".avi")
     
     return complete_file_path
 
@@ -598,7 +598,7 @@ def generate_frames():
             
             # Générer un nom de fichier unique pour la nouvelle vidéo
             file_path = defineFilePath()
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))  # Adapter la résolution selon vos besoins
         
         # Arrêter l'enregistrement si aucun objet n'est détecté
