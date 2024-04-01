@@ -14,10 +14,15 @@ export const UserProvider = ({ children }) => {
  
  // Function to log in user into our App Service app using their email & password
  const emailPasswordLogin = async (email, password) => {
-   const credentials = Credentials.emailPassword(email, password);
-   const authenticatedUser = await app.logIn(credentials);
-   setUser(authenticatedUser);
-   return authenticatedUser;
+  try {
+    const credentials = Credentials.emailPassword(email, password);
+    const authenticatedUser = await app.logIn(credentials);    
+    setUser(authenticatedUser);
+    //console.log(authenticatedUser);
+    return authenticatedUser;
+  } catch (error) {
+    throw error;
+  }
  };
  
  // Function to sign up user into our App Service app using their email & password

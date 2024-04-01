@@ -1,4 +1,3 @@
-import { Button, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context";
@@ -6,16 +5,16 @@ import Image from 'react-bootstrap/Image';
 import logo from '../resources/images/logo.png';
 import background from '../resources/images/lilleB.png';
 import React from 'react';
+
+import Button from "react-bootstrap/Button";
+
 import {
-  MDBBtn,
   MDBContainer,
   MDBCard,
   MDBCardBody,
-  MDBCardImage,
   MDBRow,
   MDBCol,
   MDBInput,
-  MDBCheckbox,
 } from 'mdb-react-ui-kit';
 
 const Login = () => {
@@ -74,7 +73,7 @@ const Login = () => {
       // Here we are passing user details to our emailPasswordLogin
       // function that we imported from our realm/authentication.js
       // to validate the user credentials and log in the user into our App.
-      const user = await emailPasswordLogin(document.getElementById('form1').value, document.getElementById('form2').value);
+      const user = await emailPasswordLogin(form.email, form.password);
       if (user) {
         redirectNow();
       }
@@ -99,9 +98,9 @@ return (
             </MDBCol>
             <MDBCol md='8'>
               <MDBCardBody>
-                <MDBInput wrapperClass='mb-4' label='Email address' id='form1' type='email' />
-                <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' />
-                <MDBBtn className="mb-4 w-100" onClick={onSubmit}>Log in</MDBBtn>
+                <MDBInput wrapperClass='mb-4' label='Email address' id='form1' name='email' value={form.email} type='email' onChange={onFormInputChange}/>
+                <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' name='password' value={form.password} onChange={onFormInputChange}/>
+                <Button className="mb-4 w-100" onClick={onSubmit}>Log in</Button>
                 <div className="text-end">
                   <Link to="/signup">Sign up</Link>
                 </div>

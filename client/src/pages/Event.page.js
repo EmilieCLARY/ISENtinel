@@ -1,5 +1,5 @@
 //import { Button } from '@mui/material'
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../contexts/user.context';
 
 import io from 'socket.io-client';
@@ -23,7 +23,6 @@ import gabinKidnapping from '../resources/images/GabinKidnapping.png';
 const socket = io('http://localhost:5000');
 
 export default function Event(){
-    const { logOutUser } = useContext(UserContext);
     const [table_event, setTableEvent] = useState([]);
     const [table_degree, setTableDegree] = useState([]);
     const [tableFilteredAndSorted, setTableFilteredAndSorted] = useState([]);

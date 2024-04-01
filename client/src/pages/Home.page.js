@@ -1,4 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext} from 'react';
+
+import { UserContext } from "../contexts/user.context";
+import socketAdmin from '../socket_manager/socketAdmin';
 
 import NavbarComponent from '../components/Navbar';
 import LogMessage from '../components/LogMessage';
@@ -15,12 +18,10 @@ import Alert from 'react-bootstrap/Alert';
 
 import { BsChevronDoubleLeft } from "react-icons/bs";
 
-
-// import io from 'socket.io-client';
-
-//const socket = io('http://localhost:5000');
-
 export default function Home() {
+
+  const {user} = useContext(UserContext);
+  const isAdmin = socketAdmin(user.id);
 
   const videoRef = useRef(null);
   const videoRef2 = useRef(null);
@@ -35,6 +36,7 @@ export default function Home() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('success'); // State for alert variant
   const [alertMessage, setAlertMessage] = useState(''); // State for alert message
+  //const [isAdmin, setIsAdmin] = useState(false); // State for admin status
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);

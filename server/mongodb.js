@@ -155,11 +155,33 @@ function checkEventObject(id, end_time, anomaly_type, camera_id, path){
     return myobj;
 }
 
+async function getIsAdminFromBDD(id) {
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('USERS');
+            if (!client.topology.isConnected()) {
+                await client.connect();
+            }
+            const query = {user_id: id};
+            const user = await collection.findOne(query);
+            return user.isAdmin;
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+    //await client.close();
+    return run().catch(console.dir);
+}
+
 module.exports = {
     attemptingCloseConnection,
     addEventToBDD,
     deleteEventFromBDD,
     editEventFromBDD,
     getEventsFromBDD,
-    getAnomalyDegreeFromBDD
+    getAnomalyDegreeFromBDD,
+    getIsAdminFromBDD
 };

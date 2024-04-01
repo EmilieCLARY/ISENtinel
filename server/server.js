@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+const session = require('express-session');
 
 var mongodb = require('./mongodb');
 //import { addEventToBDD } from 'mongodb.js';
@@ -17,10 +19,17 @@ const io = socketIo(server, {
     }
 });
 
+// Parse JSON bodies
+app.use(bodyParser.json());
+
 // Enable CORS for all routes
 app.use(cors());
 
-app.get('/', (req, res) => {
+// Parse JSON bodies
+app.use(bodyParser.json());
+
+
+/*app.get('/', (req, res) => {
     request('http://localhost:8000/video_feed', function (error, response, body) {
         console.error('error:', error); // Print the error if one occurred
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -28,11 +37,8 @@ app.get('/', (req, res) => {
 })
 });
 
-app.use('/resources', express.static('resources'))
+app.use('/resources', express.static('resources'))*/
 
-app.get('/api', (req, res) => {
-    res.json({"users": ["user1", "user2", "user3"]})
-});
 
 io.on('connection', (socket) => {
     console.log('New client connected');
@@ -82,6 +88,12 @@ io.on('connection', (socket) => {
         let table_anomaly_degree = await mongodb.getAnomalyDegreeFromBDD();
         //console.log("Socket : ", table_anomaly_degree);
         socket.emit('allDegree', table_anomaly_degree);
+    });
+
+    socket.on('getIsAdmin', async (id) => {
+        console.log('Get is admin');
+        let isAdmin = await mongodb.getIsAdminFromBDD(id);
+        socket.emit('isAdmin', isAdmin);
     });
 
 });
