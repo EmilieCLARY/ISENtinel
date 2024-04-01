@@ -1,12 +1,13 @@
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from ultralytics import YOLO
-import cv2
-import cvzone #pour diplay les detections avec des couleurs
+import cvzone  
 import math
 import datetime
 import os
 import sys
+import cv2
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -534,6 +535,8 @@ classNames = {
     600:" Zucchini"}
 
 selected_classes = [];
+is_recording = False
+video_writer = None  # Initialize video_writer variable
 
 @app.route('/class_names')
 def class_names():
@@ -552,104 +555,73 @@ def update_table():
     print(selected_classes)
     return jsonify({'message': 'Table updated successfully'})
 
-
-main_folder_path = "../src/resources/videos"
-
-def video_builder():
-
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-    # Get the current date and time
+def defineFilePath(): 
+    main_folder_path = "../src/public/videos"
     now = datetime.datetime.now()
-    date_string = now.strftime("%Y%m%d")
-    time_string = now.strftime("%H%M%S")
+    folder_name = now.strftime("%Y%m%d")
+    file_name = now.strftime("%Y%m%d_%H%M%S")
+    folder_path = os.path.join(main_folder_path, folder_name)
+    complete_file_path = os.path.join(folder_path, file_name + ".avi")
     
-    # Create the folder path with the current date
-    folder_path = os.path.join(main_folder_path, date_string)
-    
-    # Create the folder if it does not exist
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    
-    # Create the file name with the current time
-    file_name = date_string + "_" + time_string + ".mp4"
+    return complete_file_path
 
-    # Create the complete file path
-    file_path = os.path.join(folder_path, file_name)
-    out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))
 
-    return out, file_path
-
-def check_video_frame_count(video_path):
-    # Check the total number of frames in the video
-    cap = cv2.VideoCapture(video_path)
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    # Release the video capture object
-    cap.release()
-    return total_frames
-
+# Définition des fonctions
 def generate_frames():
-    
     cap = cv2.VideoCapture(0)
-    model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") #chargement du model
-    out, file_path = video_builder()
-
-    recording = False
-    is_object_detected = False
-
+    model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt") # Chargement du modèle
+    
+    recording = False  # Pour suivre si l'enregistrement est en cours
+    out = None  # Pour stocker l'objet VideoWriter en cours
+    
     while True:
-        #out = video_builder()
         success, frame = cap.read()
+        object_detected = False  # Variable pour suivre si un objet est détecté dans ce cadre
 
-        if not success:
-            break
-        else:
-            results = model(frame, stream=True) #detection des objets dans la frame
-            if not results:
-                recording = False
-                print("No object detected")
-            else:
-                recording = True
-                for r in results : 
-                    boxes = r.boxes
-                    for box in boxes : # on va chercher le x et y de toutes les binding boxes
-                        x1, y1, x2, y2 = box.xyxy[0]
-                        x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
-                        bbox = [x1, y1,w,h] #pour convertir les valeurs en int
-                        #print(x1, y1, w, h)
-                        cvzone.cornerRect(frame,bbox,colorC= (0,0,255), colorR=(10,10,10),rt=2) #affichage des bounding boxes
+        results = model(frame, stream=True) # Détection des objets dans la frame
 
-                        conf = math.ceil(box.conf[0]*100)/100 #pour afficher la confiance de guess
-                        print(conf)
+        for r in results:
+            boxes = r.boxes
+            for box in boxes:
+                object_detected = True  # Si nous avons au moins un résultat, définir l'état à True
+                x1, y1, x2, y2 = box.xyxy[0]
+                x1, y1, w, h = int(x1), int(y1), int(x2-x1), int(y2-y1)
+                bbox = [x1, y1, w, h]
+                cvzone.cornerRect(frame, bbox, colorC=(0,0,255), colorR=(10,10,10), rt=2)
+                conf = math.ceil(box.conf[0]*100)/100
+                class_name = int(box.cls[0])
+                cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40)))
 
-                        class_name = int(box.cls[0]) #pour afficher le nom de la classe
-                        cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40))) #affichage de la confiance de guess
-
-                        is_object_detected = True
-                        recording = True
-
-            if recording:
-                out.write(frame)
-            if is_object_detected:
-                cv2.putText(frame, "Recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                out.write(frame)
-            else:
-                cv2.putText(frame, "Not recording", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                out.release()
-                # Check the total number of frames in the video
-                total_frames = check_video_frame_count(file_path)
-                # If the total number of frames is less than 10, delete the video
-                if(total_frames < 10):
-                    os.remove(file_path)
-                out, file_path = video_builder()
+        if object_detected and not recording:
+            recording = True
+            print("Début de l'enregistrement...")
             
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            is_object_detected = False
+            # Générer un nom de fichier unique pour la nouvelle vidéo
+            file_path = defineFilePath()
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))  # Adapter la résolution selon vos besoins
+        
+        # Arrêter l'enregistrement si aucun objet n'est détecté
+        if not object_detected and recording:
+            recording = False
+            print("Fin de l'enregistrement...")
+            out.release()  # Fermer le fichier de sortie
+        
+        # Enregistrer le cadre dans la vidéo si l'enregistrement est en cours
+        if recording:
+            out.write(frame)
+
+        # Afficher le texte au milieu de la caméra en fonction de l'état de la détection
+        text = "Objet détecté" if object_detected else "Aucun objet détecté"
+        text_position = (int(frame.shape[1]/2) - 100, int(frame.shape[0]/2))
+        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
+    cv2.destroyAllWindows()
 
 
 @app.route('/video_feed')
