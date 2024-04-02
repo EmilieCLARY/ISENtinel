@@ -35,9 +35,13 @@ app.use(bodyParser.json());
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
         res.send(body);
 })
+});*/
+
+app.get('/api', (req, res) => {
+    res.json({"users": ["user1", "user2", "user3"]})
 });
 
-app.use('/resources', express.static('resources'))*/
+app.use('/resources', express.static('resources'))
 
 
 io.on('connection', (socket) => {

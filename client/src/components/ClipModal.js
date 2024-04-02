@@ -7,6 +7,7 @@ function getVideoPath(date, time){
     const dateStr = date.replaceAll("-", "");
     const timeStr = time.replaceAll(":", "");
     const videoPath = `/videos/${dateStr}/${dateStr}_${timeStr}.avi`;
+    //console.log("videoPath: ", videoPath);
     return videoPath;
 }
 
@@ -20,7 +21,7 @@ const ClipModal = ({ show, onHide, date, time }) => {
         </Modal.Header>
         <Modal.Body>
             <video controls style={{ width: '100%' }}>
-            <source src={getVideoPath(date,time)} type="video/x-msvideo" />
+            <source src={getVideoPath(date,time)} type="video/avi" />
             Your browser does not support the video tag.
             </video>
         </Modal.Body>

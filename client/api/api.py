@@ -555,16 +555,15 @@ def update_table():
     print(selected_classes)
     return jsonify({'message': 'Table updated successfully'})
 
-def defineFilePath(): 
-    main_folder_path = "../src/public/videos"
-    now = datetime.datetime.now()
-    folder_name = now.strftime("%Y%m%d")
-    file_name = now.strftime("%Y%m%d_%H%M%S")
-    folder_path = os.path.join(main_folder_path, folder_name)
-    complete_file_path = os.path.join(folder_path, file_name + ".avi")
-    
-    return complete_file_path
+def defineFilePath():
+    if not os.path.exists('videos'):
+        os.makedirs('videos')
 
+    now = datetime.datetime.now()
+    file_name = now.strftime("%Y%m%d_%H%M%S")
+    video_path = f'videos/{file_name}.avi'
+
+    return video_path
 
 # Définition des fonctions
 def generate_frames():
@@ -598,8 +597,9 @@ def generate_frames():
             
             # Générer un nom de fichier unique pour la nouvelle vidéo
             file_path = defineFilePath()
-            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-            out = cv2.VideoWriter(file_path, fourcc, 20.0, (640, 480))  # Adapter la résolution selon vos besoins
+            #fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Définir le codec pour la vidéo mp4v
+            fourcc = cv2.VideoWriter_fourcc(*'XVID') # Définir le codec pour la vidéo avi
+            out = cv2.VideoWriter(file_path, fourcc, 13.0, (640, 480))  # Adapter la résolution selon vos besoins
         
         # Arrêter l'enregistrement si aucun objet n'est détecté
         if not object_detected and recording:

@@ -120,7 +120,7 @@ export default function Event(){
     }
 
     function getPathFromId(id) { // id is a string of the form 'YYYYMMDD_HHMMSS', file path is a string of the form '../resources/videos/YYYYMMDD/YYYYYMMDD_HHMMSS.mp4'
-        let standard_path = "client/src/resources/videos/";
+        let standard_path = "client/public/videos/";
         let date = id.substring(0, 8);
         let file_path = standard_path + date + '/' + id + '.avi';
         return file_path;
