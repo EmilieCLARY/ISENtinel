@@ -37,6 +37,40 @@ def update_table():
     print(selected_classes)
     return jsonify({'message': 'Table updated successfully'})
 
+def generate_thumbnail(video_path, thumbnail_path):
+    # Utilisez OpenCV pour lire la vidéo
+    cap = cv2.VideoCapture(video_path)
+    
+    # Lire la dixième frame de la vidéo
+    for i in range(10):
+        ret, frame = cap.read()
+
+    # Créez une miniature de la vidéo sans réduire la taille
+    thumbnail = cv2.resize(frame, (frame.shape[1], frame.shape[0]))
+    
+    # Enregistrez la miniature
+    cv2.imwrite(thumbnail_path, thumbnail)
+    
+    # Libérez les ressources de la vidéo
+    cap.release()
+
+def defineThumbnailPath(video_path): # Create a dir in date folder called thumbnails and save the thumbnail there with the same name as the video _thumbnail.jpg
+    # Obtenez le répertoire de la vidéo
+    video_dir = os.path.dirname(video_path)
+    
+    # Obtenez le nom de la vidéo sans extension
+    video_name = os.path.splitext(os.path.basename(video_path))[0]
+    
+    # Créez le répertoire des miniatures
+    thumbnail_dir = os.path.join(video_dir, 'thumbnails')
+    if not os.path.exists(thumbnail_dir):
+        os.makedirs(thumbnail_dir)
+
+    # Définissez le chemin de la miniature
+    thumbnail_path = os.path.join(thumbnail_dir, video_name + '_thumbnail.jpg')
+    return thumbnail_path
+
+
 def defineFilePath():
     if not os.path.exists('videos'):
         os.makedirs('videos')
@@ -85,6 +119,9 @@ def generate_frames():
             recording = False
             print("Fin de l'enregistrement...")
             writer.close()
+            # Générez la miniature
+            thumbnail_path = defineThumbnailPath(file_path)
+            generate_thumbnail(file_path, thumbnail_path)
 
         if recording:
             writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
