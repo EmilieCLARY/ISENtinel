@@ -18,8 +18,6 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 import { BsCameraVideoFill, BsEyeFill, BsArrowRight, BsChevronDoubleDown , BsChevronDoubleUp } from "react-icons/bs";
 
-import gabinKidnapping from '../resources/images/GabinKidnapping.png';
-
 const socket = io('http://localhost:5000');
 
 export default function Event(){
@@ -120,7 +118,7 @@ export default function Event(){
     }
 
     function getPathFromId(id) { // id is a string of the form 'YYYYMMDD_HHMMSS', file path is a string of the form '../resources/videos/YYYYMMDD/YYYYYMMDD_HHMMSS.mp4'
-        let standard_path = "client/src/resources/videos/";
+        let standard_path = "client/public/videos/";
         let date = id.substring(0, 8);
         let file_path = standard_path + date + '/' + id + '.avi';
         return file_path;
@@ -192,8 +190,15 @@ export default function Event(){
         setSelectedEvent(null);
     };
 
+    // Dir in date folder called thumbnails and save the thumbnail there with the same name as the video _thumbnail.jpg
+    function getThumbnailPathFromId(id) {
+        let standard_path = "videos/";
+        let date = id.substring(0, 8);
+        let file_path = standard_path + date + '/thumbnails/' + id + '_thumbnail.jpg';
+        console.log("Thumbnail path: ", file_path);
+        return file_path;
+    }
 
-    
     return (
         <>
             <NavbarComponent />
@@ -260,7 +265,7 @@ export default function Event(){
                                                         <source src={`${getPathFromId(event.id)}`} type="video/mp4" />
                                                             Your browser does not support the video tag.
                                                     </video>*/}
-                                                    <Image src={gabinKidnapping} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
+                                                    <Image src={getThumbnailPathFromId(event.id)} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
                                                 </div>
                                             </Col>
                                         </Row>
