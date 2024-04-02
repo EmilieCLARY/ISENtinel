@@ -176,6 +176,72 @@ async function getIsAdminFromBDD(id) {
     return run().catch(console.dir);
 }
 
+async function login(id, email) {
+    // Check in user collection if the email is in the collection if not add the email to the user
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('USERS');
+            const query = {user_id: id};
+            const user = await collection.findOne(query);
+            // Get email from the user
+            const user_email = user.email;
+            if (user_email === undefined) {
+                const result = await collection.updateOne({user_id: id}, {$set: {email: email}});
+            }
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+    return run().catch(console.dir);
+}
+
+// Get all users from the database
+async function getUsersFromBDD() {
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('USERS');
+            let table_users = [];
+            const users = await collection.find({}).toArray();
+            for(const user of users) {
+                const result = {
+                    user_id: user.user_id,
+                    email: user.email,
+                    isAdmin: user.isAdmin
+                };
+                table_users.push(result);
+            }
+            return table_users;
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+    return run().catch(console.dir);
+}
+
+async function toggleAdmin(id) {
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('USERS');
+            const query = {user_id: id};
+            const user = await collection.findOne(query);
+            const isAdmin = user.isAdmin;
+            const result = await collection.updateOne({user_id: id}, {$set: {isAdmin: !isAdmin}});
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+    return run().catch(console.dir);
+}
+
 module.exports = {
     attemptingCloseConnection,
     addEventToBDD,
@@ -183,5 +249,8 @@ module.exports = {
     editEventFromBDD,
     getEventsFromBDD,
     getAnomalyDegreeFromBDD,
-    getIsAdminFromBDD
+    getIsAdminFromBDD,
+    login,
+    getUsersFromBDD,
+    toggleAdmin
 };

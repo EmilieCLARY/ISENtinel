@@ -1,5 +1,7 @@
 import { useContext } from 'react';
 
+import socketAdmin from '../socket_manager/socketAdmin';
+
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -17,6 +19,8 @@ const socket = io('http://localhost:5000');*/
 
 export default function NavbarComponent() {
     const { logOutUser } = useContext(UserContext);
+    const {user} = useContext(UserContext);
+    const isAdmin = socketAdmin(user.id);
     
     // This function is called when the user clicks the "Logout" button.
     const logOut = async () => {
@@ -41,6 +45,7 @@ export default function NavbarComponent() {
                 <Nav className="me-auto">
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/">Home</Nav.Link>
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/event">Events</Nav.Link>
+                    {isAdmin && <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/users">Users Management</Nav.Link>}
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/info">Infos</Nav.Link>
                 </Nav>
                 <Nav className="justify-content-end">

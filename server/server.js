@@ -52,7 +52,9 @@ io.on('connection', (socket) => {
         socket.emit('message received', 'Button clicked! Server received your message.');
       });
 
-
+    socket.on('login', (id, email) => {
+        mongodb.login(id, email);
+    });
 
     /* SOCKET BDD */
 
@@ -94,6 +96,19 @@ io.on('connection', (socket) => {
         console.log('Get is admin');
         let isAdmin = await mongodb.getIsAdminFromBDD(id);
         socket.emit('isAdmin', isAdmin);
+    });
+
+    socket.on('getAllUsers', async () => {
+        console.log('Get all users');
+        let table_user = await mongodb.getUsersFromBDD();
+        socket.emit('allUsers', table_user);
+    });
+
+    socket.on('toggleAdmin', async (id) => {
+        console.log('Toggle admin :', id);
+        await mongodb.toggleAdmin(id);
+        let table_user = await mongodb.getUsersFromBDD();
+        socket.emit('allUsers', table_user);
     });
 
 });

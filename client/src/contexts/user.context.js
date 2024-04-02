@@ -36,6 +36,15 @@ export const UserProvider = ({ children }) => {
      throw error;
    }
  };
+
+ const addUser = async (email, password) => {
+    try {
+      await app.emailPasswordAuth.registerUser(email, password);
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  };
  
  // Function to fetch the user (if the user is already logged in) from local storage
  const fetchUser = async () => {
@@ -64,7 +73,7 @@ export const UserProvider = ({ children }) => {
    }
  }
  
- return <UserContext.Provider value={{ user, setUser, fetchUser, emailPasswordLogin, emailPasswordSignup, logOutUser }}>
+ return <UserContext.Provider value={{ user, setUser, fetchUser, emailPasswordLogin, emailPasswordSignup, logOutUser, addUser}}>
    {children}
  </UserContext.Provider>;
 }

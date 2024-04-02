@@ -8,6 +8,8 @@ import React from 'react';
 
 import Button from "react-bootstrap/Button";
 
+import io from 'socket.io-client';
+
 import {
   MDBContainer,
   MDBCard,
@@ -16,6 +18,9 @@ import {
   MDBCol,
   MDBInput,
 } from 'mdb-react-ui-kit';
+
+
+const socket = io('http://localhost:5000');
 
 const Login = () => {
   const navigate = useNavigate();
@@ -75,6 +80,7 @@ const Login = () => {
       // to validate the user credentials and log in the user into our App.
       const user = await emailPasswordLogin(form.email, form.password);
       if (user) {
+        socket.emit('login', user.id, form.email );
         redirectNow();
       }
     } catch (error) {

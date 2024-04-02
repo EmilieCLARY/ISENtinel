@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef, useContext} from 'react';
 
-import { UserContext } from "../contexts/user.context";
-import socketAdmin from '../socket_manager/socketAdmin';
-
 import NavbarComponent from '../components/Navbar';
 import LogMessage from '../components/LogMessage';
 
@@ -19,9 +16,6 @@ import Alert from 'react-bootstrap/Alert';
 import { BsChevronDoubleLeft } from "react-icons/bs";
 
 export default function Home() {
-
-  const {user} = useContext(UserContext);
-  const isAdmin = socketAdmin(user.id);
 
   const videoRef = useRef(null);
   const videoRef2 = useRef(null);
