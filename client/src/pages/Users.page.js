@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useContext} from 'react';
 
-import io from 'socket.io-client';
-
 import socketAdmin from '../socket_manager/socketAdmin';
 import { UserContext } from '../contexts/user.context';
 
@@ -14,19 +12,19 @@ import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Alert from 'react-bootstrap/Alert';
 
 import { BsFillPersonCheckFill, BsFillPersonDashFill, BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
 
 import '../style/userspage.css';
 
-const socket = io('http://localhost:5000');
-
-export default function Users() {
+export default function Users({socket}) {
     const {user, addUser, emailPasswordSignup} = useContext(UserContext);
-    const isAdmin = socketAdmin(user.id);
+    const isAdmin = socketAdmin(socket, user.id);
     const [table_user, setTableUser] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
     const [form, setForm] = useState({
         email: "",
         password: ""
@@ -70,6 +68,12 @@ export default function Users() {
                    email: "",
                    password: ""
                });
+
+                // Show the alert for 5 seconds
+                setShowAlert(true);
+                setTimeout(() => {
+                    setShowAlert(false);
+                }, 5000);
             }
         } catch (error) {
             alert(error);
@@ -107,6 +111,14 @@ export default function Users() {
                     </Modal.Footer>
                 </Modal>
                 <NavbarComponent />
+                {/* Alert when register is pressed */}
+                <div  style={{position: 'absolute', width: '50vw', zIndex: '999', left: '25vw', top: '10vh'}}>
+                    <Alert show={showAlert} variant="success" onClose={() => setShowAlert(false)} dismissible>
+                        <Alert.Heading>User registered</Alert.Heading>
+                        The user has been registered successfully !
+                        In order to see it in the page, wait for him to log in for the first time.
+                    </Alert>
+                </div>
                 <Container>
                     <h1>Users Management</h1>
                     <p>Here you can manage the users of the application.</p>

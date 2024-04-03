@@ -1,5 +1,7 @@
 import { BrowserRouter, Route, Routes} from "react-router-dom";
 
+import io from 'socket.io-client';
+
 import { UserProvider } from "./contexts/user.context";
 
 import Home from "./pages/Home.page";
@@ -13,6 +15,8 @@ import Info from "./pages/Info.page";
 import 'bootstrap/dist/css/bootstrap.min.css';
  
 function App() {
+  
+  const socket = io('http://localhost:5000');
  return (
    <BrowserRouter>
      {/* We are wrapping our whole app with UserProvider so that */}
@@ -26,7 +30,7 @@ function App() {
          <Route element={<PrivateRoute />}>
            <Route exact path="/" element={<Home />} />
            <Route exact path="/event" element={<Event />} />
-           <Route exact path="/users" element={<Users />} />
+           <Route exact path="/users" element={<Users socket={socket} />} />
            <Route exact path="/info" element={<Info />} />
          </Route>
        </Routes>

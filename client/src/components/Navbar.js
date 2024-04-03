@@ -13,14 +13,16 @@ import logo from '../resources/images/logo.png';
 
 import { BsBoxArrowRight } from "react-icons/bs";
 
-/*import io from 'socket.io-client';
+import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');*/
+const socket = io('http://localhost:5000');
 
 export default function NavbarComponent() {
+    //console.log('Socket object:', socket); // Check if socket is defined
     const { logOutUser } = useContext(UserContext);
     const {user} = useContext(UserContext);
-    const isAdmin = socketAdmin(user.id);
+    const isAdmin = socketAdmin(socket, user.id);
+    
     
     // This function is called when the user clicks the "Logout" button.
     const logOut = async () => {

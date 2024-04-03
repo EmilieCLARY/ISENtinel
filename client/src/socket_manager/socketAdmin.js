@@ -1,10 +1,10 @@
 // Create a custom hook to manage socket connection and event listeners
 import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
+//import io from 'socket.io-client';
 
-const useSocketAdmin = (userId) => {
+const useSocketAdmin = (socket, userId) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const socket = io('http://localhost:5000');
+  //const socket = io('http://localhost:5000');
 
   useEffect(() => {
     const handleIsAdmin = (data) => {
