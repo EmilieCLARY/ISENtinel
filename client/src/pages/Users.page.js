@@ -14,7 +14,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Alert from 'react-bootstrap/Alert';
 
-import { BsFillPersonCheckFill, BsFillPersonDashFill, BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
+import { BsFillPersonCheckFill, BsFillPersonDashFill, BsEyeFill, BsEyeSlashFill, BsChevronDoubleDown , BsChevronDoubleUp } from "react-icons/bs";
 
 import '../style/userspage.css';
 
@@ -25,6 +25,10 @@ export default function Users({socket}) {
     const [showPassword, setShowPassword] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [tableFilteredAndSorted, setTableFilteredAndSorted] = useState([]);
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState("email");
+    const [sortOrderAsc, setSortOrderAsc] = useState(true);
     const [form, setForm] = useState({
         email: "",
         password: ""
@@ -79,6 +83,59 @@ export default function Users({socket}) {
             alert(error);
         }
     }
+
+    function handleChangeSearch(event) {
+        setSearch(event.target.value);
+    }
+
+    function handleChangeSortBy(event) {
+        setSortBy(event.target.value);
+    }
+
+    function toggleSortOrder() {
+        setSortOrderAsc(!sortOrderAsc);
+    }
+
+    function filterAndSortTable() {
+        //console.log('Filter and sort table');
+        if(table_user.length === 0) {
+            return;
+        }
+        let tableFiltered = table_user.filter((user) => {
+            if(user.email === undefined) {
+                return false;
+            }
+            return user.email.toLowerCase().includes(search.toLowerCase());
+        });
+
+        tableFiltered = tableFiltered.sort((a, b) => {
+            let aValue, bValue;
+            if (sortBy === "email") {
+                aValue = a.email;
+                bValue = b.email;
+            } else if (sortBy === "admin") {
+                aValue = a.isAdmin;
+                bValue = b.isAdmin;
+            }
+
+            if (aValue < bValue) {
+                return sortOrderAsc ? -1 : 1;
+            } else if (aValue > bValue) {
+                return sortOrderAsc ? 1 : -1;
+            } else {
+                return 0;
+            }
+        });
+
+        setTableFilteredAndSorted(tableFiltered);
+    }
+
+    useEffect(() => {
+        filterAndSortTable();
+    }, [table_user, search, sortBy, sortOrderAsc]);
+
+
+
     if (isAdmin) {
         return (
             <>
@@ -123,10 +180,28 @@ export default function Users({socket}) {
                     <h1>Users Management</h1>
                     <p>Here you can manage the users of the application.</p>
 
+                    <Form style={{marginInline: '20vw'}}>
+                    <InputGroup className="mb-1" controlid="formSearch">
+                        <InputGroup.Text id="basic-addon1">Search a user</InputGroup.Text>
+                        <Form.Label></Form.Label>
+                        <Form.Control type="text" placeholder="Enter user email" value={search} onChange={handleChangeSearch} />
+                    </InputGroup>
+                    <InputGroup className="mb-2" controlid="formSortBy">
+                        <InputGroup.Text id="basic-addon1">Sort by</InputGroup.Text>
+                        <Form.Select onChange={handleChangeSortBy}>                            
+                            <option value="email">Email</option>
+                            <option value="admin">Administrator level</option>
+                        </Form.Select>
+                        <Button variant="primary" onClick={toggleSortOrder}>
+                            {sortOrderAsc ? ("Desc " &&  <BsChevronDoubleDown /> ): "Asc " && <BsChevronDoubleUp />}
+                        </Button>
+                    </InputGroup>                    
+                </Form>
+
                     <Button onClick={handleRegister} style={{ margin: 'auto', display: 'block', marginBottom: '10px' }} variant="primary">Register a user</Button>
 
                     <ListGroup className="custom-list-users">
-                        {table_user.map((user) => (
+                        {tableFilteredAndSorted.map((user) => (
                             <ListGroup.Item key={user.user_id} >
                                 <h4>{user.email}</h4>
                                 <p>ID: {user.user_id}</p>

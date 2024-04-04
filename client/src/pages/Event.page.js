@@ -125,7 +125,7 @@ export default function Event(){
     }
 
     function filterAndSortTable() {
-        console.log("Filter and sort table");
+        //console.log("Filter and sort table");
         // Filter based on search query
         let filteredTable = table_event.filter(event =>
             event.anomaly_type.toLowerCase().includes(search.toLowerCase())
