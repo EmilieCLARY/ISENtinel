@@ -69,6 +69,11 @@ export default function Event(){
         console.log("Video from path");
     });
 
+    socket.on('clip', (newPath) => {
+        console.log("Clip received", newPath);
+    });
+
+
     function getDateFromId(id) {
         // Concatenate the date parts with '-' separator
         return(id.substring(0, 4) + '-' + id.substring(4, 6) + '-' + id.substring(6, 8));
@@ -125,7 +130,7 @@ export default function Event(){
     }
 
     function filterAndSortTable() {
-        console.log("Filter and sort table");
+        //console.log("Filter and sort table");
         // Filter based on search query
         let filteredTable = table_event.filter(event =>
             event.anomaly_type.toLowerCase().includes(search.toLowerCase())
@@ -180,6 +185,8 @@ export default function Event(){
 
     // Function to handle opening the modal and set the selected event
     const handleOpenModal = (event) => {
+        console.log("Show clip of event", event.id);
+        socket.emit('showClip', event.id);
         setSelectedEvent(event);
         setShowModal(true);
     };

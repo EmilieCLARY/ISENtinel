@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const { Client } = require('ssh2');
 
 var mongodb = require('./mongodb');
 //import { addEventToBDD } from 'mongodb.js';
@@ -50,11 +51,36 @@ io.on('connection', (socket) => {
         console.log('Client disconnected');
     });
 
-    socket.on('message', (msg) => {
-        console.log('Button clicked :', msg);
-        // Send a response back to the client
-        socket.emit('message received', 'Button clicked! Server received your message.');
-      });
+    socket.on('showClip', (id) => {
+        // Connect to SSH server
+        const conn = new Client();
+        conn.on('ready', () => {
+            conn.sftp((err, sftp) => {
+                if (err) throw err;
+                const path = '/home/user/videos/' + id + '.mp4';
+                const dest = '../client/public/videos/' + id + '.mp4';
+            
+                
+                sftp.fastGet(path, dest, (err) => {
+                    if (err) {
+                        console.error('Erreur lors du transfert de fichier: ligne 64', err);
+                    } else {
+                        console.log('Transfert de fichier réussi:', dest);
+                        socket.emit('clip', dest);
+                    }
+                    conn.end();
+                });
+                
+            });
+        }).connect({
+            hostname : '192.168.186.118',
+            port : 22,
+            username : 'user',
+            password : 'user'
+    });
+    });
+
+
 
     socket.on('login', (id, email) => {
         mongodb.login(id, email);

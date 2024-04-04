@@ -10,6 +10,7 @@ import cv2
 import time
 import imageio
 import numpy as np
+import paramiko
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +20,11 @@ classNames = { 4:"Alarm clock", 6: "Ambulance", 14: "Axe", 15: "Backpack", 19: "
 selected_classes = [];
 is_recording = False
 video_writer = None  # Initialize video_writer variable
+
+hostname = '192.168.186.118'
+port = 22
+username = 'user'
+password = 'user'
 
 @app.route('/class_names')
 def class_names():
@@ -84,6 +90,24 @@ def defineFilePath():
 
     return video_path
 
+def transferToServerSSH(localFilePath, remoteFilePath):
+    # Créez une connexion SSH
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(hostname, port, username, password)
+
+    # Transférez le fichier local vers le serveur
+    sftp = ssh.open_sftp()
+    #print(localFilePath, remoteFilePath)
+    sftp.put(localFilePath, remoteFilePath)
+    sftp.close()
+
+    # Fermez la connexion SSH
+    ssh.close()
+
+    print("Fichier transféré avec succès!")
+
+
 def generate_frames():
     cap = cv2.VideoCapture(0)
     model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt")
@@ -122,6 +146,8 @@ def generate_frames():
             # Générez la miniature
             thumbnail_path = defineThumbnailPath(file_path)
             generate_thumbnail(file_path, thumbnail_path)
+            transferToServerSSH(file_path, f'/home/user/videos/{os.path.basename(file_path)}')
+
 
         if recording:
             writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))

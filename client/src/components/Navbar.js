@@ -33,6 +33,7 @@ export default function NavbarComponent() {
         // redirected to the login page because of the <PrivateRoute /> component.
         if (loggedOut) {
             window.location.reload(true);
+            //console.log('Logged out');
         }
         } catch (error) {
         alert(error)
