@@ -186,7 +186,7 @@ export default function Event(){
 
     // Function to handle opening the modal and set the selected event
     const handleOpenModal = (event, originalEvent) => {
-        originalEvent.preventDefault(); // Prevent default form submission behavior
+        originalEvent.preventDefault();
         console.log("Show clip of event", event.id);
         setSelectedEvent(event);
         socket.emit('showClip', event.id);
@@ -195,7 +195,7 @@ export default function Event(){
     // Function to handle closing the modal
     const handleCloseModal = () => {
         setShowModal(false);
-        setSelectedEvent(null);
+        setSelectedEvent(null);        
     };
 
     // Dir in date folder called thumbnails and save the thumbnail there with the same name as the video _thumbnail.jpg

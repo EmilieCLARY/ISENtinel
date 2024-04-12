@@ -79,8 +79,6 @@ io.on('connection', (socket) => {
     });
     });
 
-
-
     socket.on('login', (id, email) => {
         mongodb.login(id, email);
     });
