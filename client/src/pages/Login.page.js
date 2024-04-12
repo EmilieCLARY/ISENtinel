@@ -107,9 +107,9 @@ return (
                 <MDBInput wrapperClass='mb-4' label='Email address' id='form1' name='email' value={form.email} type='email' onChange={onFormInputChange}/>
                 <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password' name='password' value={form.password} onChange={onFormInputChange}/>
                 <Button className="mb-4 w-100" onClick={onSubmit}>Log in</Button>
-                <div className="text-end">
+                {/*<div className="text-end">
                   <Link to="/signup">Sign up</Link>
-                </div>
+                </div>*/}
               </MDBCardBody>
             </MDBCol>
           </MDBRow>

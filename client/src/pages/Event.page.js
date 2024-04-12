@@ -71,6 +71,7 @@ export default function Event(){
 
     socket.on('clip', (newPath) => {
         console.log("Clip received", newPath);
+        setShowModal(true);
     });
 
 
@@ -184,11 +185,11 @@ export default function Event(){
     }
 
     // Function to handle opening the modal and set the selected event
-    const handleOpenModal = (event) => {
+    const handleOpenModal = (event, originalEvent) => {
+        originalEvent.preventDefault(); // Prevent default form submission behavior
         console.log("Show clip of event", event.id);
-        socket.emit('showClip', event.id);
         setSelectedEvent(event);
-        setShowModal(true);
+        socket.emit('showClip', event.id);
     };
 
     // Function to handle closing the modal
@@ -202,7 +203,7 @@ export default function Event(){
         let standard_path = "videos/";
         let date = id.substring(0, 8);
         let file_path = standard_path + date + '/thumbnails/' + id + '_thumbnail.jpg';
-        console.log("Thumbnail path: ", file_path);
+        //console.log("Thumbnail path: ", file_path);
         return file_path;
     }
 
@@ -279,7 +280,7 @@ export default function Event(){
                                         <Row style={{ marginInline: '0.2vw' }}>
                                             <Col>
                                             <div className="d-flex justify-content-center" style={{marginTop: '1vh'}}>
-                                                <Button variant="primary" onClick={() => handleOpenModal(event)}>Clip <BsEyeFill style={{ fontSize: '20px' }} /></Button>
+                                                <Button variant="primary" onClick={(event1) => handleOpenModal(event, event1)}>Clip <BsEyeFill style={{ fontSize: '20px' }} /></Button>
                                             </div>
                                             </Col>
                                         </Row>

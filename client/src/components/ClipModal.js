@@ -6,7 +6,8 @@ function getVideoPath(date, time){
 
     const dateStr = date.replaceAll("-", "");
     const timeStr = time.replaceAll(":", "");
-    const videoPath = `videos/${dateStr}/${dateStr}_${timeStr}.mp4`;
+    //const videoPath = `videos/${dateStr}/${dateStr}_${timeStr}.mp4`;
+    const videoPath = `videos/20240405_100408.mp4`;
     //console.log("videoPath: ", videoPath);
     return videoPath;
 }

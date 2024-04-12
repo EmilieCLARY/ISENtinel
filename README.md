@@ -6,7 +6,7 @@ Commands to install the project :
 - Activate it :
    - On Linux : ./venv/bin/activate
    - On Windows : .\venv\Scripts\Activate (you need to enable script first : Set-ExecutionPolicy RemoteSigned -Scope Process)
-- Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone imageio[ffmpeg]
+- Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone imageio[ffmpeg] paramiko
 
 Commands to launch the project :
 

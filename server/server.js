@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
                 const path = '/home/user/videos/' + id + '.mp4';
                 const dest = '../client/public/videos/' + id + '.mp4';
             
-                
+                //console.log('Transfert de fichier:', path, 'vers', dest);
                 sftp.fastGet(path, dest, (err) => {
                     if (err) {
                         console.error('Erreur lors du transfert de fichier: ligne 64', err);
@@ -70,10 +70,9 @@ io.on('connection', (socket) => {
                     }
                     conn.end();
                 });
-                
             });
         }).connect({
-            hostname : '192.168.186.118',
+            hostname : '192.168.2.14',
             port : 22,
             username : 'user',
             password : 'user'
