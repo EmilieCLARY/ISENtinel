@@ -44,6 +44,7 @@ app.get('/api', (req, res) => {
 
 app.use('/resources', express.static('resources'))
 
+var videoPath;
 
 io.on('connection', (socket) => {
     console.log('New client connected');
@@ -64,8 +65,10 @@ io.on('connection', (socket) => {
                 sftp.fastGet(path, dest, (err) => {
                     if (err) {
                         console.error('Erreur lors du transfert de fichier: ligne 64', err);
+                        socket.emit('clip', null);
                     } else {
                         console.log('Transfert de fichier réussi:', dest);
+                        videoPath = dest;
                         socket.emit('clip', dest);
                     }
                     conn.end();
@@ -77,6 +80,18 @@ io.on('connection', (socket) => {
             username : 'user',
             password : 'user'
     });
+    });
+
+    socket.on('closeClip', () => {
+        console.log('Suppression du fichier:', videoPath);
+        const fs = require('fs');
+        fs.unlink(videoPath, (err) => {
+            if (err) {
+                console.error('Erreur lors de la suppression du fichier:', err);
+            } else {
+                console.log('Fichier supprimé:', videoPath);
+            }
+        });
     });
 
     socket.on('login', (id, email) => {

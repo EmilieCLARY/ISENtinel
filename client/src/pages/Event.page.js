@@ -15,8 +15,11 @@ import Button from 'react-bootstrap/Button';
 import Image from 'react-bootstrap/Image';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Alert from 'react-bootstrap/Alert';
 
 import { BsCameraVideoFill, BsEyeFill, BsArrowRight, BsChevronDoubleDown , BsChevronDoubleUp } from "react-icons/bs";
+
+import '../style/eventpage.css';
 
 const socket = io('http://localhost:5000');
 
@@ -28,6 +31,7 @@ export default function Event(){
     const [sortBy, setSortBy] = useState("date");
     const [sortOrderAsc, setSortOrderAsc] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
 
 
@@ -70,6 +74,15 @@ export default function Event(){
     });
 
     socket.on('clip', (newPath) => {
+        if(newPath === null) {
+            console.log("No clip received");
+            setShowAlert(true);
+            // hide after 5 seconds
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+            return;
+        }
         console.log("Clip received", newPath);
         setShowModal(true);
     });
@@ -195,7 +208,8 @@ export default function Event(){
     // Function to handle closing the modal
     const handleCloseModal = () => {
         setShowModal(false);
-        setSelectedEvent(null);        
+        setSelectedEvent(null); 
+        socket.emit('closeClip');       
     };
 
     // Dir in date folder called thumbnails and save the thumbnail there with the same name as the video _thumbnail.jpg
@@ -238,7 +252,7 @@ export default function Event(){
                 <Row xs={1} md={2} lg={3} className="g-5">
                     {tableFilteredAndSorted.map((event, index) => (
                         <Col key={index}>
-                            <Card style={{borderWidth: '3px' ,borderColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type))}}>
+                            <Card className="event-card" style={{borderWidth: '3px' ,borderColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type))}}>
                                 <Card.Header style={{fontWeight: 'bold'}}>Event {event.id}</Card.Header>
                                 <Card.Body>
                                     <div>
@@ -297,6 +311,14 @@ export default function Event(){
                 date={selectedEvent ? getDateFromId(selectedEvent.id) : ''} 
                 time={selectedEvent ? getTimeFromId(selectedEvent.id) : ''} 
             />
+            {/*No clip found alert */}
+            <Alert show={showAlert} variant="danger" onClose={() => setShowAlert(false)} style={{position: 'fixed', top: '10vh', left: '50vw', transform: 'translate(-50%, 0)', width: '50vw', zIndex: '1000'}} dismissible>
+                <Alert.Heading>No clip found</Alert.Heading>
+                <p>
+                    The clip for the selected event could not be found.
+                </p>
+            </Alert>
+
         </>
     )
 }
