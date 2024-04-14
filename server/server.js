@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
                                         reject(err);
                                     }
                                     else {
-                                        console.log('Transfert de fichier réussi:', localPath);
+                                        //console.log('Transfert de fichier réussi:', localPath);
                                         thumbnails.push(file.filename);
                                         resolve();
                                     }
@@ -158,8 +158,62 @@ io.on('connection', (socket) => {
         console.log('Event deleted :', id);
         mongodb.deleteEventFromBDD(id);
         let table_event = await mongodb.getEventsFromBDD();
+    
+        const conn = new Client();
+        conn.on('ready', () => {
+            conn.sftp(async (err, sftp) => {
+                if (err) throw err;
+                const path = '/home/user/videos/' + id + '.mp4';
+                const dest = '../client/public/videos/' + id + '.mp4';
+                const thumbnailPath = '/home/user/videos/thumbnails/' + id + '_thumbnail.jpg';
+                const thumbnailDest = '../client/public/videos/thumbnails/' + id + '_thumbnail.jpg';
+    
+                console.log('Suppression du fichier:', path);
+                try {
+                    await new Promise((resolve, reject) => {
+                        sftp.unlink(path, (err) => {
+                            if (err) {
+                                console.error('Erreur lors de la suppression du fichier:', err);
+                                reject(err);
+                            } else {
+                                console.log('Fichier supprimé:', path);
+                                resolve();
+                            }
+                        });
+                    });
+                } catch (err) {
+                    console.error('Error deleting file:', err);
+                }
+    
+                console.log('Suppression du fichier:', thumbnailPath);
+                try {
+                    await new Promise((resolve, reject) => {
+                        sftp.unlink(thumbnailPath, (err) => {
+                            if (err) {
+                                console.error('Erreur lors de la suppression du fichier:', err);
+                                reject(err);
+                            } else {
+                                console.log('Fichier supprimé:', thumbnailPath);
+                                resolve();
+                            }
+                        });
+                    });
+                } catch (err) {
+                    console.error('Error deleting file:', err);
+                }
+    
+                conn.end();
+            });
+        }).connect({
+            hostname : '192.168.2.14',
+            port : 22,
+            username : 'user',
+            password : 'user'
+        });
+    
         socket.emit('allEvents', table_event);
     });
+
 
     socket.on('getVideoFromFilepath', (path) => {
         console.log('Get video from filepath :', path);
