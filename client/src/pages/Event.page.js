@@ -227,8 +227,8 @@ export default function Event(){
     function getThumbnailPathFromId(id) {
         let standard_path = "videos/";
         let date = id.substring(0, 8);
-        let file_path = standard_path + date + '/thumbnails/' + id + '_thumbnail.jpg';
-        //console.log("Thumbnail path: ", file_path);
+        let file_path = standard_path + '/thumbnails/' + id + '_thumbnail.jpg';
+        console.log("Thumbnail path: ", file_path);
         return file_path;
     }
 
