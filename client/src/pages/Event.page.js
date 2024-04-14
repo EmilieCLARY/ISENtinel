@@ -17,7 +17,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Alert from 'react-bootstrap/Alert';
 
-import { BsCameraVideoFill, BsEyeFill, BsArrowRight, BsChevronDoubleDown , BsChevronDoubleUp } from "react-icons/bs";
+import { BsCameraVideoFill, BsEyeFill, BsArrowRight, BsChevronDoubleDown, BsChevronDoubleUp, BsTrash3Fill } from "react-icons/bs";
 
 import '../style/eventpage.css';
 
@@ -253,7 +253,10 @@ export default function Event(){
                     {tableFilteredAndSorted.map((event, index) => (
                         <Col key={index}>
                             <Card className="event-card" style={{borderWidth: '3px' ,borderColor: changeColorOfCellDependingOnTheAnomalyLevel(getAnomalyLevelFromAnomalyType(event.anomaly_type))}}>
-                                <Card.Header style={{fontWeight: 'bold'}}>Event {event.id}</Card.Header>
+                                <Card.Header style={{fontWeight: 'bold'}}>
+                                    Event {event.id}
+                                    <Button variant="danger" style={{float: 'right'}} onClick={() => socket.emit('deleteEventFromBDD', event.id)}><BsTrash3Fill /></Button>
+                                </Card.Header>
                                 <Card.Body>
                                     <div>
                                         <Row style={{marginInline: '0.2vw'}}>

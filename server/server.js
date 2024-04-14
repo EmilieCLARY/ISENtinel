@@ -111,9 +111,11 @@ io.on('connection', (socket) => {
         mongodb.addEventToBDD(id, end_time, anomaly_type, camera_id, path);
     });
 
-    socket.on('deleteEventFromBDD', (id) => {
+    socket.on('deleteEventFromBDD', async (id) => {
         console.log('Event deleted :', id);
         mongodb.deleteEventFromBDD(id);
+        let table_event = await mongodb.getEventsFromBDD();
+        socket.emit('allEvents', table_event);
     });
 
     socket.on('getVideoFromFilepath', (path) => {
