@@ -21,7 +21,7 @@ selected_classes = [];
 is_recording = False
 video_writer = None  # Initialize video_writer variable
 
-hostname = '192.168.186.118'
+hostname = '192.168.2.14'
 port = 22
 username = 'user'
 password = 'user'
@@ -94,11 +94,12 @@ def transferToServerSSH(localFilePath, remoteFilePath):
     # Créez une connexion SSH
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    print("Connexion au serveur SSH...")
     ssh.connect(hostname, port, username, password)
-
+    print("Connexion réussie!")
     # Transférez le fichier local vers le serveur
     sftp = ssh.open_sftp()
-    #print(localFilePath, remoteFilePath)
+    print(localFilePath)
     sftp.put(localFilePath, remoteFilePath)
     sftp.close()
 
@@ -146,7 +147,11 @@ def generate_frames():
             # Générez la miniature
             thumbnail_path = defineThumbnailPath(file_path)
             generate_thumbnail(file_path, thumbnail_path)
+            print(file_path)
+            print(thumbnail_path)
             transferToServerSSH(file_path, f'/home/user/videos/{os.path.basename(file_path)}')
+            transferToServerSSH(thumbnail_path, f'/home/user/videos/thumbnails/{os.path.basename(thumbnail_path)}')
+            print("Fichiers transférés avec succès!")
 
 
         if recording:

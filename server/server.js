@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
                 //console.log('Transfert de fichier:', path, 'vers', dest);
                 sftp.fastGet(path, dest, (err) => {
                     if (err) {
-                        console.error('Erreur lors du transfert de fichier: ligne 64', err);
+                        console.error('Erreur lors du transfert de fichier', err);
                         socket.emit('clip', null);
                     } else {
                         console.log('Transfert de fichier réussi:', dest);
@@ -91,6 +91,49 @@ io.on('connection', (socket) => {
             } else {
                 console.log('Fichier supprimé:', videoPath);
             }
+        });
+    });
+
+    socket.on('getAllThumbnails', () => {
+        const conn = new Client();
+        conn.on('ready', () => {
+            conn.sftp(async (err, sftp) => {
+                if (err) throw err;
+                sftp.readdir('/home/user/videos/thumbnails', async (err, list) => {
+                    if (err) throw err;
+                    const thumbnails = [];
+                    for (const file of list) {
+                        const localPath = `../client/public/videos/thumbnails/${file.filename}`;
+                        const serverPath = `/home/user/videos/thumbnails/${file.filename}`;
+                        //console.log("Server Path", serverPath, "Local Path", localPath);
+                        
+                        try {
+                            await new Promise((resolve, reject) => {
+                                sftp.fastGet(serverPath, localPath, (err) => {
+                                    if (err) {
+                                        console.error('Erreur lors du transfert de fichier', err);
+                                        reject(err);
+                                    }
+                                    else {
+                                        console.log('Transfert de fichier réussi:', localPath);
+                                        thumbnails.push(file.filename);
+                                        resolve();
+                                    }
+                                });
+                            });
+                        } catch (err) {
+                            console.error('Error downloading file:', err);
+                        }
+                    }
+                    socket.emit('allThumbnails', thumbnails);
+                    conn.end();
+                });
+            });
+        }).connect({
+            hostname : '192.168.2.14',
+            port : 22,
+            username : 'user',
+            password : 'user'
         });
     });
 
