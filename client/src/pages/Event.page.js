@@ -38,12 +38,18 @@ export default function Event(){
     useEffect(() => {
         getAllEvents();
         getAllDegree();
+        getAllThumbnails();
     }, []);
 
     useEffect(() => {
         // Update tableFilteredAndSorted whenever table_event, search, sortBy, or sortOrder changes
         filterAndSortTable();
     }, [table_event, search, sortBy, sortOrderAsc]);
+
+    const getAllThumbnails = () => {
+        //console.log("Get all thumbnail");
+        socket.emit('getAllThumbnails');
+    }
 
     const getAllEvents = () => {
         //console.log("Get all events");
@@ -85,6 +91,11 @@ export default function Event(){
         }
         console.log("Clip received", newPath);
         setShowModal(true);
+    });
+
+    socket.on('allThumbnails', (data) => {
+        console.log("All thumbnails received");
+        console.log(data);
     });
 
 

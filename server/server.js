@@ -94,6 +94,34 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('getAllThumbnails', () => {
+        const conn = new Client();
+        conn.on('ready', () => {
+            conn.sftp((err, sftp) => {
+                if (err) throw err;
+                sftp.readdir('/home/user/videos/thumbnails', (err, list) => {
+                    if (err) throw err;
+                    const thumbnails = list.map((file) => {
+                        console.log("Fichier traité :", file.filename);
+                        const localPath = `../client/public/videos/thumbnails/${file.filename}`;
+                        sftp.fastGet(`/home/user/videos/thumbnails/${file.filename}`, localPath, (err) => {
+                            if (err) throw err;
+                            console.log(`Thumbnail ${file.filename} downloaded successfully.`);
+                        });
+                        return file.filename;
+                    });
+                    socket.emit('allThumbnails', thumbnails);
+                    conn.end();
+                });
+            });
+        }).connect({
+            hostname : '192.168.2.14',
+            port : 22,
+            username : 'user',
+            password : 'user'
+        });
+    });
+
     socket.on('login', (id, email) => {
         mongodb.login(id, email);
     });
