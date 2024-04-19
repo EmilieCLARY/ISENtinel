@@ -49,6 +49,7 @@ export default function NavbarComponent() {
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/">Home</Nav.Link>
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/event">Events</Nav.Link>
                     {isAdmin && <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/users">Users Management</Nav.Link>}
+                    {isAdmin && <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/anomaly">Anomaly Management</Nav.Link>}
                     <Nav.Link style={{fontSize: '18px', marginLeft: '2vw'}} href="/info">Infos</Nav.Link>
                 </Nav>
                 <Nav className="justify-content-end">

@@ -10,6 +10,7 @@ import PrivateRoute from "./pages/PrivateRoute.page";
 import Signup from "./pages/Signup.page";
 import Event from "./pages/Event.page";
 import Users from "./pages/Users.page";
+import Anomaly from "./pages/Anomaly.page";
 import Info from "./pages/Info.page";
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -31,6 +32,7 @@ function App() {
            <Route exact path="/" element={<Home />} />
            <Route exact path="/event" element={<Event />} />
            <Route exact path="/users" element={<Users socket={socket} />} />
+           <Route exact path="/anomaly" element={<Anomaly socket={socket} />} />
            <Route exact path="/info" element={<Info />} />
          </Route>
        </Routes>

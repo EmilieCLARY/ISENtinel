@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext} from 'react';
+import { useState, useEffect, useContext} from 'react';
 
 import socketAdmin from '../socket_manager/socketAdmin';
 import { UserContext } from '../contexts/user.context';
@@ -19,7 +19,7 @@ import { BsFillPersonCheckFill, BsFillPersonDashFill, BsEyeFill, BsEyeSlashFill,
 import '../style/userspage.css';
 
 export default function Users({socket}) {
-    const {user, addUser, emailPasswordSignup} = useContext(UserContext);
+    const {user, addUser} = useContext(UserContext);
     const isAdmin = socketAdmin(socket, user.id);
     const [table_user, setTableUser] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
@@ -181,22 +181,22 @@ export default function Users({socket}) {
                     <p>Here you can manage the users of the application.</p>
 
                     <Form style={{marginInline: '20vw'}}>
-                    <InputGroup className="mb-1" controlid="formSearch">
-                        <InputGroup.Text id="basic-addon1">Search a user</InputGroup.Text>
-                        <Form.Label></Form.Label>
-                        <Form.Control type="text" placeholder="Enter user email" value={search} onChange={handleChangeSearch} />
-                    </InputGroup>
-                    <InputGroup className="mb-2" controlid="formSortBy">
-                        <InputGroup.Text id="basic-addon1">Sort by</InputGroup.Text>
-                        <Form.Select onChange={handleChangeSortBy}>                            
-                            <option value="email">Email</option>
-                            <option value="admin">Administrator level</option>
-                        </Form.Select>
-                        <Button variant="primary" onClick={toggleSortOrder}>
-                            {sortOrderAsc ? ("Desc " &&  <BsChevronDoubleDown /> ): "Asc " && <BsChevronDoubleUp />}
-                        </Button>
-                    </InputGroup>                    
-                </Form>
+                        <InputGroup className="mb-1" controlid="formSearch">
+                            <InputGroup.Text id="basic-addon1">Search a user</InputGroup.Text>
+                            <Form.Label></Form.Label>
+                            <Form.Control type="text" placeholder="Enter user email" value={search} onChange={handleChangeSearch} />
+                        </InputGroup>
+                        <InputGroup className="mb-2" controlid="formSortBy">
+                            <InputGroup.Text id="basic-addon1">Sort by</InputGroup.Text>
+                            <Form.Select onChange={handleChangeSortBy}>                            
+                                <option value="email">Email</option>
+                                <option value="admin">Administrator level</option>
+                            </Form.Select>
+                            <Button variant="primary" onClick={toggleSortOrder}>
+                                {sortOrderAsc ? ("Desc " &&  <BsChevronDoubleDown /> ): "Asc " && <BsChevronDoubleUp />}
+                            </Button>
+                        </InputGroup>                    
+                    </Form>
 
                     <Button onClick={handleRegister} style={{ margin: 'auto', display: 'block', marginBottom: '10px' }} variant="primary">Register a user</Button>
 

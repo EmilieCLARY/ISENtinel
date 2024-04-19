@@ -242,6 +242,22 @@ async function toggleAdmin(id) {
     return run().catch(console.dir);
 }
 
+async function changeAnomalyDegree(name, degree) {
+    async function run() {
+        try {
+            await client.connect();
+            const database = client.db('ISENtinel');
+            const collection = database.collection('ANOMALY_DEGREE');
+            const query = {name: name};
+            const result = await collection.updateOne(query, {$set: {degree: degree}});
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+    return run().catch(console.dir);
+}
+
 module.exports = {
     attemptingCloseConnection,
     addEventToBDD,
@@ -252,5 +268,6 @@ module.exports = {
     getIsAdminFromBDD,
     login,
     getUsersFromBDD,
-    toggleAdmin
+    toggleAdmin,
+    changeAnomalyDegree
 };

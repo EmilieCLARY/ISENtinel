@@ -1,0 +1,27 @@
+/* Style for the list group */
+.custom-list-group {
+    margin-top: 3vh;
+    width: 50vw;
+    margin: auto;
+    display: block;
+    padding-bottom: 10vh;
+}
+  
+/* Style for list group item headings */
+.custom-list-group-item-heading {
+    color: #fff; /* Text color */
+    font-weight: bold; /* Bold text */
+}
+
+
+.custom-list-group .custom-list-group-item{
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.custom-list-group .custom-list-group-item:hover {
+    background-color: lightgray; /* Change color on hover */
+    transform: scale(1.025); /* Zoom effect */
+    font-weight: bold;
+}
+  

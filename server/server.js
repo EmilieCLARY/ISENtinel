@@ -47,10 +47,10 @@ app.use('/resources', express.static('resources'))
 var videoPath;
 
 io.on('connection', (socket) => {
-    console.log('New client connected');
-    socket.on('disconnect', () => {
+    //console.log('New client connected');
+    /*socket.on('disconnect', () => {
         console.log('Client disconnected');
-    });
+    });*/
 
     socket.on('showClip', (id) => {
         // Connect to SSH server
@@ -250,6 +250,19 @@ io.on('connection', (socket) => {
         await mongodb.toggleAdmin(id);
         let table_user = await mongodb.getUsersFromBDD();
         socket.emit('allUsers', table_user);
+    });
+
+    socket.on('getAllAnomalies', async () => {
+        console.log('Get anomalies');
+        let table_anomalies = await mongodb.getAnomalyDegreeFromBDD();
+        socket.emit('allAnomalies', table_anomalies);
+    });
+
+    socket.on('changeAnomalyDegree', async (name, degree) => {
+        console.log('Change anomaly degree :', name, degree);
+        await mongodb.changeAnomalyDegree(name, degree);
+        let table_anomalies = await mongodb.getAnomalyDegreeFromBDD();
+        socket.emit('allAnomalies', table_anomalies);
     });
 
 });
