@@ -1,0 +1,18 @@
+-r ../client/api/ByteTrack/requirements.txt
+
+# TODO: Update with exact module version
+flask
+python-dotenv
+scikit-learn
+flask-cors
+ultralytics
+cvzone
+imageio[ffmpeg]
+paramiko
+cython_bbox
+onemetric
+supervision==0.1.0
+pymongo
+IPython
+protobuf==3.20.0
+ipywidgets 

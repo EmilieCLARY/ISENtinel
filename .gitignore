@@ -8,6 +8,9 @@
 /.pnp
 .pnp.js
 /client/api/api.py.txt
+/client/api/ByteTrack
+/client/api/Yolo-Weights/*
+/client/Yolo-Weights/*
 
 # Video footages
 /client/src/resources/videos/*

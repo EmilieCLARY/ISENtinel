@@ -71,7 +71,7 @@ async function getEventsFromBDD(event_id) {
             const events = await collection.find({}).toArray();
             for(const event of events) {
                 const result = {
-                    id: event.id,
+                    id: event.tracker_id,
                     end_time: event.end_time,
                     anomaly_type: event.anomaly_type,
                     camera_id: event.camera_id,

@@ -7,7 +7,6 @@ const session = require('express-session');
 const { Client } = require('ssh2');
 
 var mongodb = require('./mongodb');
-//import { addEventToBDD } from 'mongodb.js';
 
 const PORT = 5000;
 
@@ -75,7 +74,7 @@ io.on('connection', (socket) => {
                 });
             });
         }).connect({
-            hostname : '192.168.2.14',
+            hostname : '192.168.1.98',
             port : 22,
             username : 'user',
             password : 'user'
@@ -105,7 +104,6 @@ io.on('connection', (socket) => {
                     for (const file of list) {
                         const localPath = `../client/public/videos/thumbnails/${file.filename}`;
                         const serverPath = `/home/user/videos/thumbnails/${file.filename}`;
-                        //console.log("Server Path", serverPath, "Local Path", localPath);
                         
                         try {
                             await new Promise((resolve, reject) => {
@@ -130,7 +128,7 @@ io.on('connection', (socket) => {
                 });
             });
         }).connect({
-            hostname : '192.168.2.14',
+            hostname : '192.168.1.98',
             port : 22,
             username : 'user',
             password : 'user'
@@ -205,7 +203,7 @@ io.on('connection', (socket) => {
                 conn.end();
             });
         }).connect({
-            hostname : '192.168.2.14',
+            hostname : '192.168.1.98',
             port : 22,
             username : 'user',
             password : 'user'

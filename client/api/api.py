@@ -11,20 +11,228 @@ import time
 import imageio
 import numpy as np
 import paramiko
+from yolox.tracker.byte_tracker import BYTETracker, STrack
+from onemetric.cv.utils.iou import box_iou_batch
+from dataclasses import dataclass
+import supervision
+print("supervision.__version__:", supervision.__version__)
+from supervision.draw.color import ColorPalette
+from supervision.geometry.dataclasses import Point
+from supervision.video.dataclasses import VideoInfo
+from supervision.video.source import get_video_frames_generator
+from supervision.video.sink import VideoSink
+from supervision.notebook.utils import show_frame_in_notebook
+from supervision.tools.detections import Detections, BoxAnnotator
+from supervision.tools.line_counter import LineCounter, LineCounterAnnotator
+from IPython import display
+display.clear_output()
+from typing import List
+from dataclasses import dataclass
+import pymongo
+
+HOME = os.getcwd()
+print(HOME)
+
+import sys
+sys.path.append(f"./ByteTrack")
+
+import yolox
+print("yolox.__version__:", yolox.__version__)
+
+
+@dataclass(frozen=True)
+class BYTETrackerArgs:
+    track_thresh: float = 0.25
+    track_buffer: int = 30
+    match_thresh: float = 0.9
+    aspect_ratio_thresh: float = 3.0
+    min_box_area: float = 10.0
+    mot20: bool = False
+
+@dataclass
+class Notification:
+    tracker_id: str
+    end_time: str
+    anomaly_type: str
+    path: str
+    camera_id: int = 1
+
 
 app = Flask(__name__)
 CORS(app)
 
-classNames = { 4:"Alarm clock", 6: "Ambulance", 14: "Axe", 15: "Backpack", 19: "Ball", 20: "Balloon", 22: "Band-aid", 26: "Baseball bat", 28: "Bat", 32: "Beaker", 35: "Bee", 36: "Beehive", 37: "Beer", 40: "Belt", 41: "Bench", 42: "Bicycle", 43: "Bicycle helmet", 45: "Bidet", 46: "Billboard", 47: "Billiard table", 48: "Binoculars", 49: "Bird", 50: "Blender", 53: "Bomb", 54: "Book", 55: "Bookcase", 56: "Boot", 57: "Bottle", 58: "Bottle opener", 59: "Bow and arrow", 60: "Bowl", 62: "Box", 64: "Brassiere", 65: "Bread", 66: "Briefcase", 68: "Bronze sculpture", 72: "Burrito", 75: "Butterfly", 78: "Cake", 80: "Calculator", 82: "Camera", 83: "Can opener", 85: "Candle", 86: "Candy", 87: "Cannon", 93: "Cart", 94: "Cassette deck", 96: "Cat", 100:" Ceiling fan", 103:" Chainsaw", 108:" Chicken", 110:" Chisel", 111:" Chopsticks", 112:" Christmas tree", 113:" Clock", 117:" Cocktail", 119:" Coconut", 121:" Coffee cup", 123:" Coffeemaker", 124:" Coin", 127:" Computer keyboard", 128:" Computer monitor", 129:" Computer mouse", 136:" Couch", 138:" Cowboy hat", 142:" Crocodile", 145:" Crutch", 148:" Curtain", 149:" Cutting board", 150:" Dagger", 151:" Dairy Product", 152:" Deer", 153:" Desk", 154:" Dessert", 155:" Diaper", 156:" Dice", 157:" Digital clock", 158:" Dinosaur", 159:" Dishwasher", 160:" Dog", 161:" Dog bed", 162:" Doll", 163:" Dolphin", 164:" Door", 165:" Door handle", 166:" Doughnut", 167:" Dragonfly", 168:" Drawer", 169:" Dress", 170:" Drill (Tool)", 171:" Drink", 172:" Drinking straw", 173:" Drum", 174:" Duck", 175:" Dumbbell", 176:" Eagle", 177:" Earrings", 178:" Egg (Food)", 179:" Elephant", 180:" Envelope", 181:" Eraser", 182:" Face powder", 183:" Facial tissue holder", 184:" Falcon", 185:" Fashion accessory", 186:" Fast food", 187:" Fax", 188:" Fedora", 189:" Filing cabinet", 190:" Fire hydrant", 191:" Fireplace", 192:" Fish", 193:" Flag", 194:" Flashlight", 195:" Flower", 196:" Flowerpot", 197:" Flute", 198:" Flying disc", 199:" Food", 200:" Food processor", 201:" Football", 202:" Football helmet", 203:" Footwear", 204:" Fork", 205:" Fountain", 206:" Fox", 207:" French fries", 208:" French horn", 209:" Frog", 210:" Fruit", 211:" Frying pan", 212:" Furniture", 213:" Garden Asparagus", 214:" Gas stove", 215:" Giraffe", 216:" Girl", 217:" Glasses", 218:" Glove", 219:" Goat", 220:" Goggles", 221:" Goldfish", 222:" Golf ball", 223:" Golf cart", 224:" Gondola", 225:" Goose", 226:" Grape", 227:" Grapefruit", 228:" Grinder", 229:" Guacamole", 230:" Guitar", 231:" Hair dryer", 232:" Hair spray", 233:" Hamburger", 234:" Hammer", 235:" Hamster", 236:" Hand dryer", 237:" Handbag", 238:" Handgun", 239:" Harbor seal", 240:" Harmonica", 241:" Harp", 242:" Harpsichord", 243:" Hat", 244:" Headphones", 245:" Heater", 246:" Hedgehog", 247:" Helicopter", 248:" Helmet", 249:" High heels", 250:" Hiking equipment", 251:" Hippopotamus", 252:" Home appliance", 253:" Honeycomb", 254:" Horizontal bar", 255:" Horse", 256:" Hot dog", 257:" House", 258:" Houseplant", 259:" Human arm", 260:" Human beard", 261:" Human body", 262:" Human ear", 263:" Human eye", 264:" Human face", 265:" Human foot", 266:" Human hair", 267:" Human hand", 268:" Human head", 269:" Human leg", 270:" Human mouth", 271:" Human nose", 272:" Humidifier", 273:" Ice cream", 274:" Indoor rower", 275:" Infant bed", 276:" Insect", 277:" Invertebrate", 278:" Ipod", 279:" Isopod", 280:" Jacket", 281:" Jacuzzi", 282:" Jaguar (Animal)", 283:" Jeans", 284:" Jellyfish", 285:" Jet ski", 286:" Jug", 287:" Juice", 288:" Kangaroo", 289:" Kettle", 290:" Kitchen & dining room table", 291:" Kitchen appliance", 292:" Kitchen knife", 293:" Kitchen utensil", 294:" Kitchenware", 295:" Kite", 296:" Knife", 297:" Koala", 298:" Ladder", 299:" Ladle", 300:" Ladybug", 301:" Lamp", 302:" Land vehicle", 303:" Lantern", 304:" Laptop", 305:" Lavender (Plant)", 306:" Lemon", 307:" Leopard", 308:" Light bulb", 309:" Light switch", 310:" Lighthouse", 311:" Lily", 312:" Limousine", 313:" Lion", 314:" Lipstick", 315:" Lizard", 316:" Lobster", 317:" Loveseat", 318:" Luggage and bags", 319:" Lynx", 320:" Magpie", 321:" Mammal", 322:" Man", 323:" Mango", 324:" Maple", 325:" Maracas", 326:" Marine invertebrates", 327:" Marine mammal", 328:" Measuring cup", 329:" Mechanical fan", 330:" Medical equipment", 331:" Microphone", 332:" Microwave oven", 333:" Milk", 334:" Miniskirt", 335:" Mirror", 336:" Missile", 337:" Mixer", 338:" Mixing bowl", 339:" Mobile phone", 340:" Monkey", 341:" Moths and butterflies", 342:" Motorcycle", 343:" Mouse", 344:" Muffin", 345:" Mug", 346:" Mule", 347:" Mushroom", 348:" Musical instrument", 349:" Musical keyboard", 350:" Nail (Construction)", 351:" Necklace", 352:" Nightstand", 353:" Oboe", 354:" Office building", 355:" Office supplies", 356:" Orange", 357:" Organ (Musical Instrument)", 358:" Ostrich", 359:" Otter", 360:" Oven", 361:" Owl", 362:" Oyster", 363:" Paddle", 364:" Palm tree", 365:" Pancake", 366:" Panda", 367:" Paper cutter", 368:" Paper towel", 369:" Parachute", 370:" Parking meter", 371:" Parrot", 372:" Pasta", 373:" Pastry", 374:" Peach", 375:" Pear", 376:" Pen", 377:" Pencil case", 378:" Pencil sharpener", 379:" Penguin", 380:" Perfume", 381:" Person", 382:" Personal care", 383:" Personal flotation device", 384:" Piano", 385:" Picnic basket", 386:" Picture frame", 387:" Pig", 388:" Pillow", 389:" Pineapple", 390:" Pitcher (Container)", 391:" Pizza", 392:" Pizza cutter", 393:" Plant", 394:" Plastic bag", 395:" Plate", 396:" Platter", 397:" Plumbing fixture", 398:" Polar bear", 399:" Pomegranate", 400:" Popcorn", 401:" Porch", 402:" Porcupine", 403:" Poster", 404:" Potato", 405:" Power plugs and sockets", 406:" Pressure cooker", 407:" Pretzel", 408:" Printer", 409:" Pumpkin", 410:" Punching bag", 411:" Rabbit", 412:" Raccoon", 413:" Racket", 414:" Radish", 415:" Ratchet (Device)", 416:" Raven", 417:" Rays and skates", 418:" Red panda", 419:" Refrigerator", 420:" Remote control", 421:" Reptile", 422:" Rhinoceros", 423:" Rifle", 424:" Ring binder", 425:" Rocket", 426:" Roller skates", 427:" Rose", 428:" Rugby ball", 429:" Ruler", 430:" Salad", 431:" Salt and pepper shakers", 432:" Sandal", 433:" Sandwich", 434:" Saucer", 435:" Saxophone", 436:" Scale", 437:" Scarf", 438:" Scissors", 439:" Scoreboard", 440:" Scorpion", 441:" Screwdriver", 442:" Sculpture", 443:" Sea lion", 444:" Sea turtle", 445:" Seafood", 446:" Seahorse", 447:" Seat belt", 448:" Segway", 449:" Serving tray", 450:" Sewing machine", 451:" Shark", 452:" Sheep", 453:" Shelf", 454:" Shellfish", 455:" Shirt", 456:" Shorts", 457:" Shotgun", 458:" Shower", 459:" Shrimp", 460:" Sink", 461:" Skateboard", 462:" Ski", 463:" Skirt", 464:" Skull", 465:" Skunk", 466:" Skyscraper", 467:" Slow cooker", 468:" Snack", 469:" Snail", 470:" Snake", 471:" Snowboard", 472:" Snowman", 473:" Snowmobile", 474:" Snowplow", 475:" Soap dispenser", 476:" Sock", 477:" Sofa bed", 478:" Sombrero", 479:" Sparrow", 480:" Spatula", 481:" Spice rack", 482:" Spider", 483:" Spoon", 484:" Sports equipment", 485:" Sports uniform", 486:" Squash (Plant)", 487:" Squid", 488:" Squirrel", 489:" Stairs", 490:" Stapler", 491:" Starfish", 492:" Stationary bicycle", 493:" Stethoscope", 494:" Stool", 495:" Stop sign", 496:" Strawberry", 497:" Street light", 498:" Stretcher", 499:" Studio couch", 500:" Submarine", 501:" Submarine sandwich", 502:" Suit", 503:" Suitcase", 504:" Sun hat", 505:" Sunglasses", 506:" Surfboard", 507:" Sushi", 508:" Swan", 509:" Swim cap", 510:" Swimming pool", 511:" Swimwear", 512:" Sword", 513:" Syringe", 514:" Table", 515:" Table tennis racket", 516:" Tablet computer", 517:" Tableware", 518:" Taco", 519:" Tank", 520:" Tap", 521:" Tart", 522:" Taxi", 523:" Tea", 524:" Teapot", 525:" Teddy bear", 526:" Telephone", 527:" Television", 528:" Tennis ball", 529:" Tennis racket", 530:" Tent", 531:" Tiara", 532:" Tick", 533:" Tie", 534:" Tiger", 535:" Tin can", 536:" Tire", 537:" Toaster", 538:" Toilet", 539:" Toilet paper", 540:" Tomato", 541:" Tool", 542:" Toothbrush", 543:" Torch", 544:" Tortoise", 545:" Towel", 546:" Tower", 547:" Toy", 548:" Traffic light", 549:" Traffic sign", 550:" Train", 551:" Training bench", 552:" Treadmill", 553:" Tree", 554:" Tree house", 555:" Tripod", 556:" Trombone", 557:" Trousers", 558:" Truck", 559:" Trumpet", 560:" Turkey", 561:" Turtle", 562:" Umbrella,", 563:" Unicycle", 564:" Van", 565:" Vase", 566:" Vegetable", 567:" Vehicle", 568:" Vehicle registration plate", 569:" Violin", 570:" Volleyball (Ball)", 571:" Waffle", 572:" Waffle iron", 573:" Wall clock", 574:" Wardrobe", 575:" Washing machine", 576:" Waste container", 577:" Watch", 578:" Watercraft", 579:" Watermelon", 580:" Weapon", 581:" Whale", 582:" Wheel", 583:" Wheelchair", 584:" Whisk", 585:" Whiteboard", 586:" Willow", 587:" Window", 588:" Window blind", 589:" Wine", 590:" Wine glass", 591:" Wine rack", 592:" Winter melon", 593:" Wok", 594:" Woman", 595:" Wood-burning stove", 596:" Woodpecker", 597:" Worm", 598:" Wrench", 599:" Zebra", 600:" Zucchini" }
+classNames = {
+  #6: "Ambulance",
+  14: "Axe",
+  #15: "Backpack",
+  19: "Ball",
+  #20: "Balloon",
+  #22: "Band-aid",
+  26: "Baseball bat",
+  28: "Bat",
+  37: "Beer",
+  42: "Bicycle",
+  49: "Bird",
+  53: "Bomb",
+  #54: "Book",
+  #56: "Boot",
+  57: "Bottle",
+  59: "Bow and arrow",
+  62: "Box",
+  64: "Brassiere",
+  66: "Briefcase",
+  82: "Camera",
+  #85: "Candle",
+  87: "Cannon",
+  93: "Cart",
+  96: "Cat",
+  100:" Ceiling fan",
+  103:" Chainsaw",
+  108:" Chicken",
+  110:" Chisel",
+  117:" Cocktail",
+  142:" Crocodile",
+  150:" Dagger",
+  152:" Deer",
+  160:" Dog",
+  170:" Drill (Tool)",
+  174:" Duck",
+  176:" Eagle",
+  179:" Elephant",
+  184:" Falcon",
+  191:" Fireplace",
+  198:" Flying disc",
+  201:" Football",
+  204:" Fork",
+  206:" Fox",
+  #208:" French horn",
+  #209:" Frog",
+  #211:" Frying pan",
+  215:" Giraffe",
+  219:" Goat",
+  #220:" Goggles",
+  223:" Golf cart",
+  225:" Goose",
+  228:" Grinder",
+  234:" Hammer",
+  #235:" Hamster",
+  238:" Handgun",
+  246:" Hedgehog",
+  #247:" Helicopter",
+  #249:" High heels",
+  250:" Hiking equipment",
+  251:" Hippopotamus",
+  255:" Horse",
+  259:" Human arm",
+  260:" Human beard",
+  261:" Human body",
+  262:" Human ear",
+  263:" Human eye",
+  264:" Human face",
+  265:" Human foot",
+  266:" Human hair",
+  267:" Human hand",
+  268:" Human head",
+  269:" Human leg",
+  270:" Human mouth",
+  271:" Human nose",
+  276:" Insect",
+  277:" Invertebrate",
+  279:" Isopod",
+  282:" Jaguar (Animal)",
+  288:" Kangaroo",
+  292:" Kitchen knife",
+  296:" Knife",
+  297:" Koala",
+  299:" Ladle",
+  307:" Leopard",
+  313:" Lion",
+  #315:" Lizard",
+  318:" Luggage and bags",
+  319:" Lynx",
+  322:" Man",
+  329:" Mechanical fan",
+  334:" Miniskirt",
+  #335:" Mirror",
+  336:" Missile",
+  340:" Monkey",
+  #341:" Moths and butterflies",
+  343:" Mouse",
+  346:" Mule",
+  #350:" Nail (Construction)",
+  358:" Ostrich",
+  359:" Otter",
+  361:" Owl",
+  366:" Panda",
+  379:" Penguin",
+  381:" Person",
+  387:" Pig",
+  398:" Polar bear",
+  411:" Rabbit",
+  412:" Raccoon",
+  416:" Raven",
+  418:" Red panda",
+  421:" Reptile",
+  422:" Rhinoceros",
+  423:" Rifle",
+  425:" Rocket",
+  426:" Roller skates",
+  #427:" Rose",
+  440:" Scorpion",
+  448:" Segway",
+  452:" Sheep",
+  455:" Shirt",
+  456:" Shorts",
+  457:" Shotgun",
+  #458:" Shower",
+  #460:" Sink",
+  461:" Skateboard",
+  462:" Ski",
+  463:" Skirt",
+  #464:" Skull",
+  #469:" Snail",
+  470:" Snake",
+  479:" Sparrow",
+  488:" Squirrel",
+  492:" Stationary bicycle",
+  #501:" Submarine sandwich",
+  508:" Swan",
+  512:" Sword",
+  #513:" Syringe",
+  519:" Tank",
+  530:" Tent",
+  534:" Tiger",
+  536:" Tire",
+  542:" Toothbrush",
+  543:" Torch",
+  544:" Tortoise",
+  560:" Turkey",
+  561:" Turtle",
+  563:" Unicycle",
+  564:" Van",
+  567:" Vehicle",
+  568:" Vehicle registration plate",
+  580:" Weapon",
+  582:" Wheel",
+  583:" Wheelchair",
+  589:" Wine",
+  594:" Woman",
+  #597:" Worm",
+  599:" Zebra"}
+
 
 selected_classes = [];
 is_recording = False
 video_writer = None  # Initialize video_writer variable
+trackers_info = {};
+notifications_table = [];
 
-hostname = '192.168.2.14'
+hostname = '192.168.1.98'
 port = 22
 username = 'user'
 password = 'user'
+
+model = YOLO("Yolo-Weights/yolov8n-oiv7.pt")
 
 @app.route('/class_names')
 def class_names():
@@ -47,10 +255,14 @@ def generate_thumbnail(video_path, thumbnail_path):
     # Utilisez OpenCV pour lire la vidéo
     cap = cv2.VideoCapture(video_path)
     
+    
     # Lire la dixième frame de la vidéo
-    for i in range(10):
+    for i in range(1):
         ret, frame = cap.read()
-
+        if frame is None:
+               print("Failed to capture frame for thumbnail.")
+               cap.release()
+               return
     # Créez une miniature de la vidéo sans réduire la taille
     thumbnail = cv2.resize(frame, (frame.shape[1], frame.shape[0]))
     
@@ -108,21 +320,152 @@ def transferToServerSSH(localFilePath, remoteFilePath):
 
     print("Fichier transféré avec succès!")
 
+def insertEventInMongoDB(event):
+    # Insérez l'événement dans la base de données MongoDB
+    print(event)
+    myClient = pymongo.MongoClient("mongodb+srv://admin:admin@isentinel.fw6fyxk.mongodb.net/")
+    myDb = myClient["ISENtinel"]
+    myCol = myDb["EVENT"]
+    myCol.insert_one(event)
+
+
+def generate_unique_id(class_id, datetime_obj):
+    #generate a unique ID for each tracker based on the time, class ID and bounding box
+    date = datetime.datetime.now().strftime("%Y%m%d")
+    time = datetime.datetime.now().strftime("%H%M%S")
+    
+    video_name = f'{date}_{time}'
+    return video_name
+
+# converts Detections into format that can be consumed by match_detections_with_tracks function
+def detections2boxes(detections: Detections) -> np.ndarray:
+    return np.hstack((
+        detections.xyxy,
+        detections.confidence[:, np.newaxis]
+    ))
+
+
+# converts List[STrack] into format that can be consumed by match_detections_with_tracks function
+def tracks2boxes(tracks: List[STrack]) -> np.ndarray:
+    return np.array([
+        track.tlbr
+        for track
+        in tracks
+    ], dtype=float)
+
+
+# matches our bounding boxes with predictions
+def match_detections_with_tracks(
+    detections: Detections,
+    tracks: List[STrack],
+    frame_number: int
+) -> Detections:
+    if not np.any(detections.xyxy) or len(tracks) == 0:
+        print("No detections or tracks available for matching.")
+        return np.empty((0,))
+
+    tracks_boxes = tracks2boxes(tracks=tracks)
+    iou = box_iou_batch(tracks_boxes, detections.xyxy)
+    track2detection = np.argmax(iou, axis=1)
+
+    tracker_ids = [None] * len(detections)
+    print(f"detections: {detections.xyxy}")
+    for tracker_index, detection_index in enumerate(track2detection):
+        if iou[tracker_index, detection_index] != 0:
+            #tracker_ids[detection_index] = tracks[tracker_index].track_id
+            tracker_id = tracks[tracker_index].track_id
+            tracker_ids[detection_index] = tracker_id
+            # Extract the individual attributes of the detection for this index
+            xyxy = detections.xyxy[detection_index]
+            confidence = detections.confidence[detection_index]
+            class_id = detections.class_id[detection_index]
+            update_tracker_info(tracker_id, xyxy, confidence, class_id, frame_number)
+        else:
+            print(f"Rejected match for tracker {tracker_index} to detection {detection_index} with IoU {iou[tracker_index, detection_index]}")
+
+    return tracker_ids
+
+def filter_detections_by_class(detections, class_ids):
+    """
+    Filter detections to only include specified classes using numpy operations.
+
+    Parameters:
+    - detections: Detections object containing numpy arrays for 'xyxy', 'confidence', and 'class_id'.
+    - class_ids: Set or list of class IDs to include.
+
+    Returns:
+    - Detections: Filtered Detections object.
+    """
+    class_ids = np.array(list(class_ids))  # Ensure class_ids is a numpy array for efficient operation
+    class_mask = np.isin(detections.class_id, class_ids)  # Create a mask of bools where class_id is in class_ids
+    confidence_mask = detections.confidence >=0.25
+    combined_mask = class_mask & confidence_mask
+    # Apply the mask to each array in the Detections object
+    filtered_xyxy = detections.xyxy[combined_mask]
+    filtered_confidence = detections.confidence[combined_mask]
+    filtered_class_id = detections.class_id[combined_mask]
+
+    # Return a new Detections object with the filtered data
+    return Detections(
+        xyxy=filtered_xyxy,
+        confidence=filtered_confidence,
+        class_id=filtered_class_id
+    )
+
+def formateEndTIme(end_time):
+    newEndTime = end_time.strftime("%H%M%S")
+    return newEndTime
+
+def update_tracker_info(tracker_id, xyxy, confidence, class_id, frame_number):
+    detection_info = {
+        'xyxy': xyxy,
+        'confidence': confidence,
+        'class_id': class_id
+    }
+    if tracker_id not in trackers_info:
+        trackers_info[tracker_id] = {
+            'complete_id': generate_unique_id(class_id, datetime.datetime.now()),
+            'created_at': datetime.datetime.now(),
+            'last_seen': formateEndTIme(datetime.datetime.now()),
+            'initial_detection': detection_info,
+            'detections': [detection_info],
+            'class' : detection_info['class_id']
+        }
+    else:
+        trackers_info[tracker_id]['last_seen'] = formateEndTIme(datetime.datetime.now())
+        trackers_info[tracker_id]['detections'].append(detection_info)
+
+def release_resources(cap):
+    cap.release()
+    cv2.destroyAllWindows()
+
+
 
 def generate_frames():
+    input_video_path = f'videos/vehicle-counting.mp4'
     cap = cv2.VideoCapture(0)
-    model = YOLO("../Yolo-Weights/yolov8n-oiv7.pt")
+    if not cap.isOpened():
+        print("Error: Could not open video.")
 
     recording = False
     writer = None
+    frame_number = 0
+    box_annotator = BoxAnnotator(
+                thickness=2,
+                text_thickness=2,
+                text_scale=1,
+                color=ColorPalette(),
+            )   
+
+    byte_tracker = BYTETracker(BYTETrackerArgs())
 
     while True:
         success, frame = cap.read()
         object_detected = False
-
-        results = model(frame, stream=True)
-
-        for r in results:
+        frame_number = frame_number + 1
+        #results = model(frame, stream=True)
+    
+        """for r in results:
             boxes = r.boxes
             for box in boxes:
                 object_detected = True
@@ -132,45 +475,115 @@ def generate_frames():
                 cvzone.cornerRect(frame, bbox, colorC=(0,0,255), colorR=(10,10,10), rt=2)
                 conf = math.ceil(box.conf[0]*100)/100
                 class_name = int(box.cls[0])
-                cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40)))
+                cvzone.putTextRect(frame, f'{conf}{classNames.get(class_name)}', (max(0,x1),max(y1-20,40)))"""
+        
+        if success:
+            # Run YOLOv8 tracking on the frame, persisting tracks between frames
+            results = model(frame)
+            original_frame = frame.copy()
+            #detections = sv.Detections.from_yolov8(results)
+            if len(results) == 0:
+                detections = Detections(
+                    xyxy=np.empty((0, 4)),
+                    confidence=np.empty((0,)),
+                    class_id=np.empty((0,), dtype=int)
+                )
+            else:
+                detections = Detections(
+                    xyxy=results[0].boxes.xyxy.cpu().numpy(),
+                    confidence=results[0].boxes.conf.cpu().numpy(),
+                    class_id=results[0].boxes.cls.cpu().numpy().astype(int)
+                )
+                detections = filter_detections_by_class(detections, selected_classes)
+                if (detections) : object_detected = True
+                tracks = byte_tracker.update(
+                output_results=detections2boxes(detections=detections),
+                img_info=frame.shape,
+                img_size=frame.shape
+                )
+                tracker_id = match_detections_with_tracks(detections=detections, tracks=tracks, frame_number=frame_number)
+                detections.tracker_id = np.array(tracker_id)
+                #print all tracker id:
+                print("tracker_id: ", tracker_id, file=sys.stdout)
+                #print all detections:
+                print("detections: ", detections, file=sys.stdout)
+                #print all tracks:
+                print("tracks: ", tracks, file=sys.stdout)
+                if tracker_id:
+                    labels = [
+                        f"#{tracker_id} {model.model.names[class_id]} {confidence:0.2f}"
+                        for _, confidence, class_id, tracker_id in zip(detections.xyxy, detections.confidence, detections.class_id, tracker_id)
+                    ]
+                    frame = box_annotator.annotate(frame=frame, detections=detections, labels=labels)
+                else:
+                    labels = []
 
-        if object_detected and not recording:
-            recording = True
-            print("Début de l'enregistrement...")
-            file_path = defineFilePath()
-            writer = imageio.get_writer(file_path, fps=13)
-
-        if not object_detected and recording:
-            recording = False
-            print("Fin de l'enregistrement...")
-            writer.close()
-            # Générez la miniature
-            thumbnail_path = defineThumbnailPath(file_path)
-            generate_thumbnail(file_path, thumbnail_path)
-            print(file_path)
-            print(thumbnail_path)
-            transferToServerSSH(file_path, f'/home/user/videos/{os.path.basename(file_path)}')
-            transferToServerSSH(thumbnail_path, f'/home/user/videos/thumbnails/{os.path.basename(thumbnail_path)}')
-            print("Fichiers transférés avec succès!")
-
-
-        if recording:
-            writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-
-        text = "Objet detected" if object_detected else "No object detected"
-        text_position = (int(frame.shape[1]/2) - 100, int(frame.shape[0]/2))
-        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
 
-    cap.release()
-    cv2.destroyAllWindows()
+            if object_detected and not recording:
+                recording = True
+                print("Début de l'enregistrement...")
+                file_path = defineFilePath()
+                writer = imageio.get_writer(file_path, fps=13)
+
+            if not object_detected and recording :
+                recording = False
+                print("Fin de l'enregistrement...")
+                writer.close()
+                # Output tracker information
+                for tracker_id, info in trackers_info.items():
+                    # Enleve l'espace devant le nom de la classe
+                    newClassName = classNames.get(info['class'])
+                    if newClassName[0] == ' ':
+                        newClassName = newClassName[1:]
+                    notifications_table.append(Notification(tracker_id=info['complete_id'], end_time=info['last_seen'], anomaly_type=boule, camera_id=1, path=file_path))
+
+
+                for notification in notifications_table:
+                    print(f"Tracker ID: {notification.tracker_id}")
+                    print(f"end_time: {notification.end_time}")
+                    print(f"anomaly_type: {notification.anomaly_type}")
+                    print(f"camera_id: {notification.camera_id}")
+                    print(f"path: {notification.path}")
+                    insertEventInMongoDB(notification.__dict__)
+
+                notifications_table.clear()
+                trackers_info.clear()
+
+                # Générez la miniature
+                thumbnail_path = defineThumbnailPath(file_path)
+                generate_thumbnail(file_path, thumbnail_path)
+                print(file_path)
+                print(thumbnail_path)
+                transferToServerSSH(file_path, f'/home/user/videos/{os.path.basename(file_path)}')
+                transferToServerSSH(thumbnail_path, f'/home/user/videos/thumbnails/{os.path.basename(thumbnail_path)}')
+                print("Fichiers transférés avec succès!")
+
+
+            if recording:
+                writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+            text = "Objet detected" if object_detected else "No object detected"
+            text_position = (int(frame.shape[1]/12), int(frame.shape[0]/12))
+            cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+            combined_frame = np.hstack((original_frame, frame))
+
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        else:
+            # Break the loop if the end of the video is reached
+            break
+
+    release_resources(cap)
+
+# (id, end_time, anomaly_type, camera_id, path)
 
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 if __name__ == '__main__':
     app.run(debug=True)

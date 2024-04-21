@@ -89,13 +89,12 @@ export default function Event(){
             }, 5000);
             return;
         }
-        console.log("Clip received", newPath);
+        //console.log("Clip received", newPath);
         setShowModal(true);
     });
 
     socket.on('allThumbnails', (data) => {
-        console.log("All thumbnails received");
-        console.log(data);
+        //console.log("All thumbnails received");
     });
 
 
@@ -150,7 +149,7 @@ export default function Event(){
     function getPathFromId(id) { // id is a string of the form 'YYYYMMDD_HHMMSS', file path is a string of the form '../resources/videos/YYYYMMDD/YYYYYMMDD_HHMMSS.mp4'
         let standard_path = "client/public/videos/";
         let date = id.substring(0, 8);
-        let file_path = standard_path + date + '/' + id + '.avi';
+        let file_path = standard_path + date + '/' + id + '.mp4';
         return file_path;
     }
 
@@ -165,13 +164,13 @@ export default function Event(){
          filteredTable.sort((a, b) => {
             let aValue, bValue;
 
-            if (sortBy === "camera") {
+            if (sortBy === "camera_id") {
                 aValue = a.camera_id;
                 bValue = b.camera_id;
-            } else if (sortBy === "date") {
+            } else if (sortBy === "tracker_id") {
                 aValue = a.id;
                 bValue = b.id;
-            } else if (sortBy === "anomaly") {
+            } else if (sortBy === "anomaly_type") {
                 aValue = a.anomaly_type;
                 bValue = b.anomaly_type;
             } else if (sortBy === "anomalyLevel") {
@@ -185,7 +184,7 @@ export default function Event(){
             // For anomaly level, you may want to adjust the comparison logic based on your requirement
             if (sortBy === "anomalyLevel") {
                 return sortOrderAsc ? aValue - bValue : bValue - aValue;
-            } else if (sortBy === "camera"){
+            } else if (sortBy === "camera_id    "){
                 return sortOrderAsc ? aValue - bValue : bValue - aValue;
             } 
             else {
@@ -212,8 +211,10 @@ export default function Event(){
     const handleOpenModal = (event, originalEvent) => {
         originalEvent.preventDefault();
         console.log("Show clip of event", event.id);
+        let newpath =(event.path).split("/")[2];
+        newpath = newpath.substring(0, newpath.length - 4);
         setSelectedEvent(event);
-        socket.emit('showClip', event.id);
+        socket.emit('showClip', newpath);
     };
 
     // Function to handle closing the modal
@@ -224,11 +225,11 @@ export default function Event(){
     };
 
     // Dir in date folder called thumbnails and save the thumbnail there with the same name as the video _thumbnail.jpg
-    function getThumbnailPathFromId(id) {
+    function getThumbnailPathFromId(path) {
         let standard_path = "videos/";
-        let date = id.substring(0, 8);
-        let file_path = standard_path + '/thumbnails/' + id + '_thumbnail.jpg';
-        console.log("Thumbnail path: ", file_path);
+        let newpath =(path).split("/")[2];
+        newpath = newpath.substring(0, newpath.length - 4);
+        let file_path = standard_path + '/thumbnails/' + newpath + '_thumbnail.jpg';
         return file_path;
     }
 
@@ -301,7 +302,7 @@ export default function Event(){
                                                         <source src={`${getPathFromId(event.id)}`} type="video/mp4" />
                                                             Your browser does not support the video tag.
                                                     </video>*/}
-                                                    <Image src={getThumbnailPathFromId(event.id)} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
+                                                    <Image src={getThumbnailPathFromId(event.path)} style={{ width: '80%', height: '100%', borderRadius: '8px' }} />
                                                 </div>
                                             </Col>
                                         </Row>
@@ -322,8 +323,7 @@ export default function Event(){
             <ClipModal 
                 show={showModal} 
                 onHide={handleCloseModal} 
-                date={selectedEvent ? getDateFromId(selectedEvent.id) : ''} 
-                time={selectedEvent ? getTimeFromId(selectedEvent.id) : ''} 
+                path={selectedEvent ? selectedEvent.path : ''}
             />
             {/*No clip found alert */}
             <Alert show={showAlert} variant="danger" onClose={() => setShowAlert(false)} style={{position: 'fixed', top: '10vh', left: '50vw', transform: 'translate(-50%, 0)', width: '50vw', zIndex: '1000'}} dismissible>
