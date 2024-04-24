@@ -8,7 +8,7 @@ Commands to install the project :
    - On Linux : source ./venv/bin/activate
    - On Windows : .\venv\Scripts\Activate (you need to enable script first : Set-ExecutionPolicy RemoteSigned -Scope Process)
 - git clone https://github.com/ifzhang/ByteTrack.git
-- cd ByteTrack
+- Now go to client/api/ByteTrack
 - sed -i -e 's/onnx==1.8.1/onnx==1.9.0/g' -e 's/onnxruntime==1.8.0/onnxruntime==1.16.0/g' requirements.txt
 - pip3 install -q -r requirements.txt 
 - pip install -e .
