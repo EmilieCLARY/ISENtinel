@@ -18,5 +18,10 @@ Commands to install the project :
 Commands to launch the project :
 
 - In /server : npm start dev
-- In /api in venv : flask run --port 8000
+- In /api in your venv : flask run --port 8000
 - In /client : npm start
+
+Server-side :
+
+To launch it with the server, you need to change the IP adress of it in the code to match it with the local adress of the server.
+To launch Snort on the server, you need to launch : sudo snort -q -A console -c snort.conf
