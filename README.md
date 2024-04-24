@@ -12,8 +12,8 @@ Commands to install the project :
 - sed -i -e 's/onnx==1.8.1/onnx==1.9.0/g' -e 's/onnxruntime==1.8.0/onnxruntime==1.16.0/g' requirements.txt
 - pip3 install -q -r requirements.txt 
 - pip install -e .
-- Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone imageio[ffmpeg] paramiko cython_bbox onemetric supervision==0.1.0 pymongo IPython protobuf==3.20.0 ipywidgets  ( + loguru lap thop si ça marche pas)
-- Search np.float( in all files and replace it with float(
+- Install python plugins : pip install flask python-dotenv scikit-learn flask-cors ultralytics cvzone imageio[ffmpeg] paramiko cython_bbox onemetric supervision==0.1.0 pymongo IPython protobuf==3.20.0 ipywidgets
+- Search np.float) in all files and replace it with float) (The ByteTrack library is using deprecated syntax)
 
 Commands to launch the project :
 
