@@ -229,7 +229,7 @@ export default function Event(){
         let standard_path = "videos/";
         let newpath =(path).split("/")[2];
         newpath = newpath.substring(0, newpath.length - 4);
-        let file_path = standard_path + '/thumbnails/' + newpath + '_thumbnail.jpg';
+        let file_path = standard_path + 'thumbnails/' + newpath + '_thumbnail.jpg';
         return file_path;
     }
 

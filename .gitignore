@@ -8,7 +8,7 @@
 /.pnp
 .pnp.js
 /client/api/api.py.txt
-/client/api/ByteTrack
+/client/api/ByteTrack/*
 /client/api/Yolo-Weights/*
 /client/Yolo-Weights/*
 

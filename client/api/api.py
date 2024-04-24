@@ -29,6 +29,8 @@ display.clear_output()
 from typing import List
 from dataclasses import dataclass
 import pymongo
+import requests
+from bson import ObjectId
 
 HOME = os.getcwd()
 print(HOME)
@@ -227,7 +229,7 @@ video_writer = None  # Initialize video_writer variable
 trackers_info = {};
 notifications_table = [];
 
-hostname = '192.168.1.98'
+hostname = '192.168.255.118'
 port = 22
 username = 'user'
 password = 'user'
@@ -327,6 +329,10 @@ def insertEventInMongoDB(event):
     myDb = myClient["ISENtinel"]
     myCol = myDb["EVENT"]
     myCol.insert_one(event)
+
+    
+
+    
 
 
 def generate_unique_id(class_id, datetime_obj):
@@ -527,6 +533,18 @@ def generate_frames():
                 file_path = defineFilePath()
                 writer = imageio.get_writer(file_path, fps=13)
 
+                object_name = classNames.get(detections.class_id[0])
+                print(f"Objet détecté: {object_name}")
+
+                data = {'object_name': object_name}
+                url = 'http://localhost:5000/add_event'
+                headers = {'Content-Type': 'application/json'}
+                response = requests.post(url, json=data, headers=headers)
+                if response.status_code == 200:
+                    print("Event data sent successfully.")
+                else:
+                    print("Failed to send event data. Status code:", response.status_code)
+
             if not object_detected and recording :
                 recording = False
                 print("Fin de l'enregistrement...")
@@ -537,7 +555,7 @@ def generate_frames():
                     newClassName = classNames.get(info['class'])
                     if newClassName[0] == ' ':
                         newClassName = newClassName[1:]
-                    notifications_table.append(Notification(tracker_id=info['complete_id'], end_time=info['last_seen'], anomaly_type=boule, camera_id=1, path=file_path))
+                    notifications_table.append(Notification(tracker_id=info['complete_id'], end_time=info['last_seen'], anomaly_type=newClassName, camera_id=1, path=file_path))
 
 
                 for notification in notifications_table:
@@ -570,7 +588,7 @@ def generate_frames():
 
             combined_frame = np.hstack((original_frame, frame))
 
-            ret, buffer = cv2.imencode('.jpg', frame)
+            ret, buffer = cv2.imencode('.jpg', combined_frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 

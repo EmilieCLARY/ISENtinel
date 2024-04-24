@@ -7,11 +7,6 @@ function getVideoPath(path){
     return newpath;
 }
 
-function getOriginalPath(){
-
-}
-
-
 const ClipModal = ({ show, onHide, path }) => {
       
     return (

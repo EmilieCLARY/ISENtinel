@@ -88,7 +88,7 @@ export default function Anomaly({socket}) {
     }, [table_anomalies, search, sortBy, sortOrderAsc]);
 
     function handleDegreeChange(event, name) {
-        socket.emit('changeAnomalyDegree', name, event.target.value);
+        socket.emit('changeAnomalyDegree', name, parseInt(event.target.value));
     }
 
 

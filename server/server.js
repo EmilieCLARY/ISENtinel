@@ -37,6 +37,19 @@ app.use(bodyParser.json());
 })
 });*/
 
+app.post('/add_event', (req, res) => {
+    // Handle incoming event data here
+    const eventData = req.body; // Assuming event data is sent in the request body
+    console.log("Received event data:", eventData);
+
+    // Send to the client the event
+    io.emit('newEvent', eventData);
+
+    // Respond with appropriate status code
+    res.sendStatus(200); // Sending back a success status
+});
+
+
 app.get('/api', (req, res) => {
     res.json({"users": ["user1", "user2", "user3"]})
 });
@@ -74,7 +87,7 @@ io.on('connection', (socket) => {
                 });
             });
         }).connect({
-            hostname : '192.168.1.98',
+            hostname : '192.168.255.118',
             port : 22,
             username : 'user',
             password : 'user'
@@ -128,7 +141,7 @@ io.on('connection', (socket) => {
                 });
             });
         }).connect({
-            hostname : '192.168.1.98',
+            hostname : '192.168.255.118',
             port : 22,
             username : 'user',
             password : 'user'
@@ -203,7 +216,7 @@ io.on('connection', (socket) => {
                 conn.end();
             });
         }).connect({
-            hostname : '192.168.1.98',
+            hostname : '192.168.255.118',
             port : 22,
             username : 'user',
             password : 'user'

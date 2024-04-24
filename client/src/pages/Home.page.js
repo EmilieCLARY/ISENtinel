@@ -3,6 +3,8 @@ import { useState, useEffect, useRef, useContext} from 'react';
 import NavbarComponent from '../components/Navbar';
 import LogMessage from '../components/LogMessage';
 
+import io from 'socket.io-client';
+
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
@@ -14,6 +16,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 
 import { BsChevronDoubleLeft } from "react-icons/bs";
+
+const socket = io('http://localhost:5000');
 
 export default function Home() {
 
@@ -30,11 +34,24 @@ export default function Home() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('success'); // State for alert variant
   const [alertMessage, setAlertMessage] = useState(''); // State for alert message
+  const [table_anomalies, setTableAnomalies] = useState([]);
   //const [isAdmin, setIsAdmin] = useState(false); // State for admin status
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
 
+  const getAllAnomalies = () => {
+    socket.emit('getAllAnomalies');
+  }
+
+  useEffect(() => {
+      getAllAnomalies();
+  }, []);
+
+  socket.on('allAnomalies', (table_anomalies_) => {
+      setTableAnomalies(table_anomalies_);
+      console.log('Table anomalies:', table_anomalies);
+  });
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
@@ -93,6 +110,43 @@ export default function Home() {
   const handleTMP = () => {
     addEventToState({ message: "Event 11", type: "alert3" });
   }
+
+
+  function getAlertType(name){
+    let anomaly = table_anomalies.find(anomaly => anomaly.name === name);
+    if(anomaly){
+      const degree = anomaly.degree;
+      
+      switch (degree) {
+        case 1:
+          return 'alert1'
+        case 2:
+          return 'alert2'
+        case 3:
+          return 'alert3'
+        case 4:
+          return 'alert4'
+        case 5:
+          return 'alert5'
+        default:
+          return "alert1";    // Default to 'info' for unknown degrees
+    }
+  }
+    else{
+      return 'alert1'
+    }
+  }
+
+  useEffect(() => {
+    socket.on('newEvent', eventData => {
+      console.log(eventData);
+      let alertType = getAlertType(eventData.object_name);
+      addEventToState({message: eventData.object_name, type: alertType})
+    });
+    return () => {
+      socket.off('newEvent');
+    };
+  }, []);
 
   const handleCheckboxChange = (event, key) => {
     setSelectedClasses(prevState => {
@@ -162,21 +216,12 @@ export default function Home() {
         <h1 style={{paddingBottom: '1vh'}}>Welcome to ISENtinel</h1>
         <Row style={{paddingBottom: '2vh'}}>
           <Col style={{ position: 'relative', height: '60vh'}}><Spinner animation="border" role="status" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: '1' }} /><img style={{ position: 'relative', width: '100%',  height: '100%',  objectFit: 'cover', border: '2px solid #ccc', borderRadius: '8px', zIndex: '2'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
-          <Col style={{ position: 'relative', height: '60vh'}}><Spinner animation="border" role="status" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: '1' }} /><img style={{ position: 'relative', width: '100%',  height: '100%',  objectFit: 'cover', border: '2px solid #ccc', borderRadius: '8px', zIndex: '2'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
+          <Col style={{ position: 'relative', height: '60vh', display: 'none'}}><Spinner animation="border" role="status" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: '1' }} /><img style={{ position: 'relative', width: '100%',  height: '100%',  objectFit: 'cover', border: '2px solid #ccc', borderRadius: '8px', zIndex: '2'}} src="http://localhost:8000/video_feed" alt="Video Feed" /></Col>
         </Row>
         <Row>
           <Col>
             <div style={{backgroundColor: 'black', color: 'white', height: '15vh', overflow: 'auto', borderRadius: '8px'}} id='scrollbar' ref={containerRef}>
-              <LogMessage message="Event 1" type="alert1" />
-              <LogMessage message="Event 2" type="alert2" />
-              <LogMessage message="Event 3" type="alert3" />
-              <LogMessage message="Event 4" type="alert4" />
-              <LogMessage message="Event 5" type="alert5" />
-              <LogMessage message="Event 6" type="alert1" />
-              <LogMessage message="Event 7" type="alert2" />
-              <LogMessage message="Event 8" type="alert3" />
-              <LogMessage message="Event 9" type="alert4" />
-              <LogMessage message="Event 10" type="alert5" />
+              
 
               {events.map((event, index) => (
                 <LogMessage key={index} message={event.message} type={event.type} />
